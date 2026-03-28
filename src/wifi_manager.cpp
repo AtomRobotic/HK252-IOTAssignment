@@ -1,40 +1,46 @@
 #include "wifi_manager.h"
+#include <Preferences.h> // <--- Thêm thư viện này
 
 void setupWiFi() {
+    // Thông tin mạng phát ra để cấu hình (Cố định)
     const char* ap_ssid = "ESP32_Config_AP";
     const char* ap_pass = "12345678";  
     
-    const char* sta_ssid = "Luqi.";     
-    const char* sta_pass = "0611151004"; 
+    // ĐỌC THÔNG TIN WI-FI TỪ BỘ NHỚ FLASH
+    Preferences prefs;
+    prefs.begin("iot_config", false); // true = Chế độ Read-only
+    String sta_ssid = prefs.getString("ssid", ""); 
+    String sta_pass = prefs.getString("pass", "");
+    prefs.end();
 
-    // Bật chế độ Vừa phát (AP) vừa nhận (STA)
     WiFi.mode(WIFI_AP_STA);
 
-    // 1. Khởi tạo mạng Access Point (AP) để chạy Web Server nội bộ
+    // 1. Luôn phát Wi-Fi AP để đề phòng trường hợp mất mạng còn có thể vào cấu hình lại
     Serial.println("\n--- Khởi tạo Access Point ---");
     WiFi.softAP(ap_ssid, ap_pass);
-    Serial.print("Đã phát Wi-Fi! IP để vào Web (AP): ");
+    Serial.print("IP Web Config: ");
     Serial.println(WiFi.softAPIP());
 
-    // 2. Kết nối vào mạng Station (STA) để chuẩn bị cho MQTT CoreIOT
-    Serial.println("\n--- Bắt đầu kết nối Router (STA) ---");
-    WiFi.begin(sta_ssid, sta_pass);
+    // 2. Chỉ kết nối STA nếu người dùng đã từng lưu cấu hình Wi-Fi
+    if (sta_ssid.length() > 0) {
+        Serial.printf("\n[Wi-Fi] Đang kết nối tới: %s\n", sta_ssid.c_str());
+        WiFi.begin(sta_ssid.c_str(), sta_pass.c_str());
 
-    // Dùng cơ chế Timeout 10 giây để không bị treo hệ thống nếu sai pass Wi-Fi
-    unsigned long startAttemptTime = millis();
-    const unsigned long timeout = 10000; 
+        unsigned long startAttemptTime = millis();
+        // Chờ tối đa 10s
+        while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000) {
+            Serial.print(".");
+            vTaskDelay(500 / portTICK_PERIOD_MS); 
+        }
+        Serial.println();
 
-    while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < timeout) {
-        Serial.print(".");
-        // Dùng delay của RTOS thay vì delay() thường để nhường CPU cho task khác
-        vTaskDelay(500 / portTICK_PERIOD_MS); 
-    }
-    Serial.println();
-
-    if (WiFi.status() == WL_CONNECTED) {
-        Serial.print("Kết nối Internet thành công! IP (STA): ");
-        Serial.println(WiFi.localIP());
+        if (WiFi.status() == WL_CONNECTED) {
+            Serial.print("[Wi-Fi] Đã có Internet! IP: ");
+            Serial.println(WiFi.localIP());
+        } else {
+            Serial.println("[Wi-Fi] Sai mật khẩu hoặc mất mạng! (Vào IP 192.168.4.1 để cấu hình lại)");
+        }
     } else {
-        Serial.println("Kết nối Internet thất bại! ESP32 vẫn giữ AP mode để bạn xài Web.");
+        Serial.println("[Wi-Fi] Chưa có cấu hình mạng! Đang chờ bạn nhập trên Web...");
     }
 }

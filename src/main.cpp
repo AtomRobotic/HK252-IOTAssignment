@@ -4,6 +4,7 @@
 #include "wifi_manager.h"
 #include "coreiot_mqtt.h"
 #include <Adafruit_NeoPixel.h>
+#include <nvs_flash.h>
 
 extern void setupWiFi();
 
@@ -60,6 +61,14 @@ void setup()
 {
   Serial.begin(115200);
   Serial.println("Hệ thống đang khởi động...");
+
+  esp_err_t err = nvs_flash_init();
+  if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    // NVS bị lỗi hoặc khác phiên bản -> Xóa đi và định dạng lại
+    nvs_flash_erase();
+    err = nvs_flash_init();
+  }
+  Serial.println("Đã khởi tạo phân vùng NVS thành công!");
 
   // 4. KHỞI TẠO LED
   Adafruit_NeoPixel *myLed = new Adafruit_NeoPixel(1, 48, NEO_GRB + NEO_KHZ800);

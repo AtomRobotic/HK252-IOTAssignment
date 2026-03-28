@@ -1,4 +1,5 @@
 #include "coreiot_mqtt.h"
+#include <Preferences.h>
 
 // Thông tin Broker của CoreIOT
 const char* mqtt_server = "app.coreiot.io";
@@ -8,40 +9,48 @@ const char* mqtt_token = "4rhHtCs98RoOhzFz6DlD";
 void mqttTask(void *pvParameters) {
     QueueHandle_t sensorQueue = (QueueHandle_t)pvParameters;
     
-    // Khai báo đối tượng MQTT cục bộ
+    // ĐỌC THÔNG TIN MQTT TỪ BỘ NHỚ
+    Preferences prefs;
+    prefs.begin("iot_config", false);
+    String mqtt_server = prefs.getString("server", "");
+    int mqtt_port = prefs.getInt("port", 1883);
+    String mqtt_token = prefs.getString("token", "");
+    prefs.end();
+
     WiFiClient espClient;
     PubSubClient client(espClient);
-    client.setServer(mqtt_server, mqtt_port);
+
+    // Nếu chưa có cấu hình Server, tự sát (xóa) Task MQTT để tiết kiệm RAM chờ Reset
+    if(mqtt_server.length() == 0 || mqtt_token.length() == 0) {
+        Serial.println("[MQTT] Thiếu cấu hình Server/Token. Tạm ngưng MQTT.");
+        vTaskDelete(NULL); 
+    }
+
+    client.setServer(mqtt_server.c_str(), mqtt_port);
 
     SensorData data;
-    
-    // Cài đặt gửi 5 giây một lần
     const TickType_t publishInterval = 5000 / portTICK_PERIOD_MS;
     TickType_t lastPublishTime = xTaskGetTickCount();
 
     while (1) {
         if (WiFi.status() == WL_CONNECTED) {
-            
-            // 1. Kết nối với CoreIOT
             if (!client.connected()) {
-                Serial.print("[MQTT] Đang kết nối tới CoreIOT...");
-                if (client.connect("ESP32S3_Client", mqtt_token, "")) {
+                Serial.print("[MQTT] Đang kết nối Server...");
+                // Dùng Token làm username
+                if (client.connect("ESP32S3_Client", mqtt_token.c_str(), "")) {
                     Serial.println(" Thành công!");
                 } else {
-                    Serial.print(" Thất bại, mã lỗi = ");
+                    Serial.print(" Lỗi=");
                     Serial.println(client.state());
                     vTaskDelay(5000 / portTICK_PERIOD_MS);
-                    continue;
+                    continue; 
                 }
             }
-            client.loop();
+            client.loop(); 
 
-            // 2. Định kỳ gửi dữ liệu
             if (xTaskGetTickCount() - lastPublishTime >= publishInterval) {
-
                 if (xQueuePeek(sensorQueue, &data, 0) == pdPASS) {
                     
-                    // Đóng gói JSON
                     StaticJsonDocument<200> doc;
                     doc["temperature"] = data.temperature;
                     doc["humidity"] = data.humidity;
@@ -50,11 +59,10 @@ void mqttTask(void *pvParameters) {
                     char jsonBuffer[256];
                     serializeJson(doc, jsonBuffer);
 
-                    // Gửi lên CoreIOT
                     if(client.publish("v1/devices/me/telemetry", jsonBuffer)) {
-                        Serial.printf("[MQTT] Đã đẩy lên CoreIOT: %s\n", jsonBuffer);
+                        Serial.printf("[MQTT] Đã gửi: %s\n", jsonBuffer);
                     } else {
-                        Serial.println("[MQTT] Lỗi đẩy dữ liệu!");
+                        Serial.println("[MQTT] Lỗi gửi data!");
                     }
                 }
                 lastPublishTime = xTaskGetTickCount();
