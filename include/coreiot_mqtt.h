@@ -4,6 +4,6 @@
 #include "common.h"
 
 // Hàm khởi tạo Task MQTT, nhận vào con trỏ Queue chứa dữ liệu cảm biến
-void initMQTTTask(QueueHandle_t sensorQueue);
+void initMQTTTask(SystemContext *ctx);
 
 #endif

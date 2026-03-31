@@ -3,74 +3,85 @@
 #include "web_server.h"
 #include "wifi_manager.h"
 #include "coreiot_mqtt.h"
-#include <Adafruit_NeoPixel.h>
 #include <nvs_flash.h>
 
 extern void setupWiFi();
 
-// TẠO STRUCT ĐỂ ĐÓNG GÓI LED VÀ QUEUE
-struct RelayTaskConfig
-{
-  QueueHandle_t commandQueue;
-  Adafruit_NeoPixel *led;
-};
+// ==========================================================
+// KHÔNG CÓ BẤT KỲ BIẾN GLOBAL NÀO Ở ĐÂY CẢ! ĐÚNG CHUẨN RTOS!
+// ==========================================================
 
+void autoControlTask(void *pvParameters) {
+  SystemContext *ctx = (SystemContext *)pvParameters;
+  
+  // Biến cục bộ để nhớ trạng thái trước đó, tránh gửi lệnh spam
+  int currentPumpState = -1; 
+  int currentFanState = -1;
 
-void relayControlTask(void *pvParameters)
-{
-  RelayTaskConfig *config = (RelayTaskConfig *)pvParameters;
-  QueueHandle_t relayQueue = config->commandQueue;
-  Adafruit_NeoPixel *pixels = config->led;
+  while (1) {
+    // 1. Take Semaphore (Bảo vệ dữ liệu cấu hình đang đọc)
+    if (xSemaphoreTake(ctx->autoMutex, portMAX_DELAY) == pdTRUE) {
+      
+      if (ctx->autoCfg.isAuto) {
+        SensorData data;
+        if (xQueuePeek(ctx->sensorQueue, &data, 0) == pdPASS) {
+          RelayCommand cmd;
 
+          // Rule Bơm (Relay 1)
+          if (ctx->autoCfg.r1_en && data.soilMoisture < ctx->autoCfg.soil_low && currentPumpState != 1) {
+            cmd = {1, 1}; xQueueSend(ctx->relayQueue, &cmd, 0); currentPumpState = 1;
+            Serial.println("[AUTO] Đất khô -> BẬT Bơm");
+          } else if (ctx->autoCfg.r2_en && data.soilMoisture > ctx->autoCfg.soil_high && currentPumpState != 0) {
+            cmd = {1, 0}; xQueueSend(ctx->relayQueue, &cmd, 0); currentPumpState = 0;
+            Serial.println("[AUTO] Đất đủ ẩm -> TẮT Bơm");
+          }
+
+          // Rule Quạt (Relay 2)
+          if (ctx->autoCfg.r3_en && data.temperature > ctx->autoCfg.temp_high && currentFanState != 1) {
+            cmd = {2, 1}; xQueueSend(ctx->relayQueue, &cmd, 0); currentFanState = 1;
+            Serial.println("[AUTO] Nóng -> BẬT Quạt");
+          } else if (ctx->autoCfg.r4_en && data.temperature < ctx->autoCfg.temp_low && currentFanState != 0) {
+            cmd = {2, 0}; xQueueSend(ctx->relayQueue, &cmd, 0); currentFanState = 0;
+            Serial.println("[AUTO] Mát -> TẮT Quạt");
+          }
+        }
+      } else {
+        // Reset nếu chuyển qua Manual
+        currentPumpState = -1; 
+        currentFanState = -1;
+      }
+      
+      // 2. Trả lại Semaphore
+      xSemaphoreGive(ctx->autoMutex);
+    }
+    vTaskDelay(5000 / portTICK_PERIOD_MS);
+  }
+}
+
+void relayControlTask(void *pvParameters) {
+  SystemContext *ctx = (SystemContext *)pvParameters;
   RelayCommand cmd;
-
-  while (1)
-  {
-    if (xQueueReceive(relayQueue, &cmd, portMAX_DELAY) == pdPASS)
-    {
-      Serial.printf("[Relay Task] Web yêu cầu: Thiết bị %d -> %s\n",
-                    cmd.deviceId, cmd.state ? "BẬT" : "TẮT");
-
-      if (cmd.deviceId == 2)
-      {
-        if (cmd.state == 1)
-        {
-          pixels->setPixelColor(0, pixels->Color(0, 0, 255)); 
-          Serial.println("[Relay Task] Quạt BẬT -> LED Xanh Dương");
-        }
-        else
-        {
-          pixels->setPixelColor(0, pixels->Color(255, 0, 0));
-          Serial.println("[Relay Task] Quạt TẮT -> LED Đỏ");
-        }
-
-        // --- BÍ QUYẾT CHỐNG NHIỄU TÍN HIỆU WI-FI ---
-        // Ép mạch đẩy tín hiệu 5 lần liên tiếp.
-        // Nếu xung Wi-Fi làm hỏng lần 1, các lần sau sẽ lọt qua được và đè màu lại chuẩn xác.
-        for (int i = 0; i < 5; i++)
-        {
-          pixels->show();
-          vTaskDelay(2 / portTICK_PERIOD_MS); // Nghỉ 2ms để nhường CPU
-        }
+  
+  while(1) {
+    if (xQueueReceive(ctx->relayQueue, &cmd, portMAX_DELAY) == pdPASS) {
+      if(cmd.deviceId == 2) {
+        if(cmd.state == 1) ctx->led->setPixelColor(0, ctx->led->Color(0, 0, 255));
+        else ctx->led->setPixelColor(0, ctx->led->Color(255, 0, 0));
+        ctx->led->show();
       }
     }
   }
 }
 
-void setup()
-{
+void setup() {
   Serial.begin(115200);
-  Serial.println("Hệ thống đang khởi động...");
-
   esp_err_t err = nvs_flash_init();
   if (err == ESP_ERR_NVS_NO_FREE_PAGES || err == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-    // NVS bị lỗi hoặc khác phiên bản -> Xóa đi và định dạng lại
     nvs_flash_erase();
-    err = nvs_flash_init();
+    nvs_flash_init();
   }
-  Serial.println("Đã khởi tạo phân vùng NVS thành công!");
 
-  // 4. KHỞI TẠO LED
+  // Cấp phát thiết bị động
   Adafruit_NeoPixel *myLed = new Adafruit_NeoPixel(1, 48, NEO_GRB + NEO_KHZ800);
   myLed->begin();
   myLed->setBrightness(50);
@@ -79,38 +90,23 @@ void setup()
 
   setupWiFi();
 
-  // Khởi tạo Queue
-  QueueHandle_t sensorDataQueue = xQueueCreate(1, sizeof(SensorData));
-  QueueHandle_t relayCommandQueue = xQueueCreate(5, sizeof(RelayCommand));
+  // Tạo Context động (Nằm trên Heap, không phải biến toàn cục)
+  SystemContext *ctx = new SystemContext();
+  ctx->sensorQueue = xQueueCreate(1, sizeof(SensorData));
+  ctx->relayQueue = xQueueCreate(5, sizeof(RelayCommand));
+  ctx->autoMutex = xSemaphoreCreateMutex(); 
+  ctx->led = myLed;
+  ctx->autoCfg = {false, true, 40.0, true, 60.0, true, 32.0, true, 28.0};
 
-  if (sensorDataQueue == NULL || relayCommandQueue == NULL)
-  {
-    Serial.println("Lỗi RAM!");
-    return;
-  }
+  // Truyền duy nhất `ctx` vào tất cả các Task
+  initMockSensorTask(ctx);
+  initMQTTTask(ctx);
+  initWebServer(ctx);
 
-  // ĐÓNG GÓI VÀO STRUCT ĐỂ TRUYỀN CHO TASK
-  RelayTaskConfig *relayConfig = new RelayTaskConfig();
-  relayConfig->commandQueue = relayCommandQueue;
-  relayConfig->led = myLed;
-
-  initMockSensorTask(sensorDataQueue);
-  initWebServer(sensorDataQueue, relayCommandQueue);
-  initMQTTTask(sensorDataQueue);
-
-  xTaskCreatePinnedToCore(
-      relayControlTask,
-      "RelayTask",
-      4096,
-      (void *)relayConfig,
-      2,
-      NULL,
-      1);
-
-  Serial.println("Hoàn tất Setup! RTOS đang điều phối các luồng...");
+  xTaskCreatePinnedToCore(autoControlTask, "AutoTask", 4096, (void *)ctx, 1, NULL, 1);
+  xTaskCreatePinnedToCore(relayControlTask, "RelayTask", 4096, (void *)ctx, 2, NULL, 1);
 }
 
-void loop()
-{
+void loop() {
   vTaskDelete(NULL);
 }

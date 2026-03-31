@@ -1,33 +1,24 @@
 #include "coreiot_mqtt.h"
 #include <Preferences.h>
 
-// Thông tin Broker của CoreIOT
-const char* mqtt_server = "app.coreiot.io";
-const int mqtt_port = 1883;
-const char* mqtt_token = "4rhHtCs98RoOhzFz6DlD";
-
 void mqttTask(void *pvParameters) {
-    QueueHandle_t sensorQueue = (QueueHandle_t)pvParameters;
+    SystemContext *ctx = (SystemContext *)pvParameters;
     
-    // ĐỌC THÔNG TIN MQTT TỪ BỘ NHỚ
     Preferences prefs;
     prefs.begin("iot_config", false);
-    String mqtt_server = prefs.getString("server", "");
+    String mqtt_server = prefs.getString("server", "app.coreiot.io"); // Mặc định local
     int mqtt_port = prefs.getInt("port", 1883);
-    String mqtt_token = prefs.getString("token", "");
+    String mqtt_token = prefs.getString("token", "4rhHtCs98RoOhzFz6DlD"); // Mặc định local
     prefs.end();
 
     WiFiClient espClient;
     PubSubClient client(espClient);
 
-    // Nếu chưa có cấu hình Server, tự sát (xóa) Task MQTT để tiết kiệm RAM chờ Reset
     if(mqtt_server.length() == 0 || mqtt_token.length() == 0) {
-        Serial.println("[MQTT] Thiếu cấu hình Server/Token. Tạm ngưng MQTT.");
         vTaskDelete(NULL); 
     }
 
     client.setServer(mqtt_server.c_str(), mqtt_port);
-
     SensorData data;
     const TickType_t publishInterval = 5000 / portTICK_PERIOD_MS;
     TickType_t lastPublishTime = xTaskGetTickCount();
@@ -35,13 +26,9 @@ void mqttTask(void *pvParameters) {
     while (1) {
         if (WiFi.status() == WL_CONNECTED) {
             if (!client.connected()) {
-                Serial.print("[MQTT] Đang kết nối Server...");
-                // Dùng Token làm username
                 if (client.connect("ESP32S3_Client", mqtt_token.c_str(), "")) {
-                    Serial.println(" Thành công!");
+                    Serial.println("[MQTT] Thành công!");
                 } else {
-                    Serial.print(" Lỗi=");
-                    Serial.println(client.state());
                     vTaskDelay(5000 / portTICK_PERIOD_MS);
                     continue; 
                 }
@@ -49,21 +36,14 @@ void mqttTask(void *pvParameters) {
             client.loop(); 
 
             if (xTaskGetTickCount() - lastPublishTime >= publishInterval) {
-                if (xQueuePeek(sensorQueue, &data, 0) == pdPASS) {
-                    
+                if (xQueuePeek(ctx->sensorQueue, &data, 0) == pdPASS) {
                     StaticJsonDocument<200> doc;
                     doc["temperature"] = data.temperature;
                     doc["humidity"] = data.humidity;
                     doc["soilMoisture"] = data.soilMoisture;
-
                     char jsonBuffer[256];
                     serializeJson(doc, jsonBuffer);
-
-                    if(client.publish("v1/devices/me/telemetry", jsonBuffer)) {
-                        Serial.printf("[MQTT] Đã gửi: %s\n", jsonBuffer);
-                    } else {
-                        Serial.println("[MQTT] Lỗi gửi data!");
-                    }
+                    client.publish("v1/devices/me/telemetry", jsonBuffer);
                 }
                 lastPublishTime = xTaskGetTickCount();
             }
@@ -72,6 +52,6 @@ void mqttTask(void *pvParameters) {
     }
 }
 
-void initMQTTTask(QueueHandle_t sensorQueue) {
-    xTaskCreatePinnedToCore(mqttTask, "MQTTTask", 4096, (void*)sensorQueue, 1, NULL, 0);
+void initMQTTTask(SystemContext *ctx) {
+    xTaskCreatePinnedToCore(mqttTask, "MQTTTask", 4096, (void*)ctx, 1, NULL, 0);
 }
