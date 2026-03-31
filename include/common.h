@@ -6,6 +6,7 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <LittleFS.h>
+#include <DHT20.h>
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
