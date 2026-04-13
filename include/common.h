@@ -8,6 +8,8 @@
 #include <LittleFS.h>
 #include <DHT20.h>
 #include <LiquidCrystal_I2C.h>
+#include "global.h"
+#include <string.h>
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>

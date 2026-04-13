@@ -30,10 +30,48 @@ void TaskLCD(void *pvParameters){
     lcd.init();
     lcd.backlight();
 
+    SensorData rcvSensorData;
+    AppContext *app = (AppContext *)pvParameters;
+
+    const char *state = "";
+
     while(1){
-        displayTemperatureHumidity(lcd);
-        vTaskDelay(2000);
-        displayLux(lcd);
+        if(xSemaphoreTake(app->xSemaphoreLCD, portMAX_DELAY) == pdTRUE){
+          if(xQueuePeek(app->xQueueSensor, &rcvSensorData, 0) == pdTRUE){
+            rcvSensorData = app->sensorData;
+            float temperature = rcvSensorData.temperature;
+            float humidity = rcvSensorData.humidity;
+
+            if(temperature > 20 && temperature < 30){
+              state = "Normal";
+            } else if((temperature >= 15 && temperature <= 20) || (temperature >= 30 && temperature <= 35)){
+              state = "Warning";
+            } else {
+              state = "Critical";
+            }
+
+            if(humidity > 50 && humidity < 80){
+              state = "Normal";
+            } else if((humidity >= 40 && humidity <= 50) || (humidity >= 80 && humidity <= 90)){
+              state = "Warning";
+            } else {
+              state = "Critical";
+            }
+
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("State: ");
+            lcd.print(state);
+
+            lcd.setCursor(0,1);
+            // char buffer[32];
+            // snprintf(buffer, sizeof(buffer), "T: %.1fC H: %.1f%%", temperature, humidity);
+            // lcd.print(buffer);
+
+            lcd.print("temp: "); lcd.print(temperature); lcd.print("C ");
+            //lcd.print("humid: "); lcd.print(humidity); lcd.print("%");
+          }
+        }
         vTaskDelay(2000);
     }
 
