@@ -30,6 +30,10 @@ void TaskLCD(void *pvParameters){
     lcd.init();
     lcd.backlight();
 
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print("Initializing...");
+
     SensorData rcvSensorData;
     AppContext *app = (AppContext *)pvParameters;
 
@@ -64,11 +68,11 @@ void TaskLCD(void *pvParameters){
             lcd.print(state);
 
             lcd.setCursor(0,1);
-            // char buffer[32];
-            // snprintf(buffer, sizeof(buffer), "T: %.1fC H: %.1f%%", temperature, humidity);
-            // lcd.print(buffer);
+            char buffer[32];
+            snprintf(buffer, sizeof(buffer), "T:%.1fC H:%.1f%%", temperature, humidity);
+            lcd.print(buffer);
 
-            lcd.print("temp: "); lcd.print(temperature); lcd.print("C ");
+            //lcd.print("temp: "); lcd.print(temperature); lcd.print("C ");
             //lcd.print("humid: "); lcd.print(humidity); lcd.print("%");
           }
         }

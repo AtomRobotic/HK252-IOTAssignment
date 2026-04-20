@@ -10,6 +10,7 @@
 #include <LiquidCrystal_I2C.h>
 #include "global.h"
 #include <string.h>
+#include <Adafruit_NeoPixel.h>
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -42,6 +43,8 @@
 #define LED_PIN 48
 #define LUX_PIN 1
 
+#define NUM_PIXELS 1
+#define PIN_NEO_PIXEL 45
 
 
 
