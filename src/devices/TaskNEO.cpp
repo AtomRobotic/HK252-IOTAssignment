@@ -36,6 +36,11 @@ void TaskNeoLED(void *pvParameters) {
   SensorData rcvSensorData;
   while(1) {
     if(xSemaphoreTake(app->xSemaphoreNeoLed, portMAX_DELAY) == pdTRUE){
+      if(currentMode == MANUAL){
+        Serial.println("Neo LED Control in MANUAL mode");
+        xSemaphoreGive(app->xSemaphoreNeoLed); // Release the semaphore for other tasks
+        continue; // Skip Neo LED control in MANUAL mode
+      }
       if(xQueuePeek(app->xQueueSensor, &rcvSensorData, 0) == pdTRUE){
         float humidity = rcvSensorData.humidity;
 
@@ -43,7 +48,7 @@ void TaskNeoLED(void *pvParameters) {
         if (humidity > 50 && humidity < 80) {
           colorIndex = GREEN; // Normal
         } else if ((humidity >= 40 && humidity <= 50) || (humidity >= 80 && humidity <= 90)) {
-          colorIndex = YELLOW; // Warning
+          colorIndex = ORANGE; // Warning
         } else {
           colorIndex = RED; // Critical
         }
