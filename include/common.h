@@ -35,6 +35,7 @@
 #include "devices/TaskLED.h"
 #include "devices/TaskLux.h"
 #include "devices/TaskLCD.h"
+#include "devices/TaskNEO.h"
 
 /* Define --------------------------------------------------------------------*/
 

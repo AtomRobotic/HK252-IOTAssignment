@@ -18,6 +18,7 @@ void setup()
   xTaskCreatePinnedToCore(TaskTemperature_Humidity, "Temp Humidity", 4096, &app, 2, NULL, 1);
   xTaskCreatePinnedToCore(TaskLuxSensor, "Lux Sensor", 2048, &app, 2, NULL, 1);
   xTaskCreatePinnedToCore(TaskLCD, "LCD Display", 4096, &app, 2, NULL, 1);
+  xTaskCreatePinnedToCore(TaskNeoLED, "Neo LED Control", 2048, &app, 2, NULL, 1);
 }
 
 void loop()
