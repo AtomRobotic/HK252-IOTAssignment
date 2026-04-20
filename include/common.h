@@ -37,6 +37,7 @@
 #include "devices/TaskLCD.h"
 #include "devices/TaskNEO.h"
 #include "devices/TaskFan.h"
+#include "devices/TaskSoilMoisture.h"
 
 /* Define --------------------------------------------------------------------*/
 
@@ -45,6 +46,7 @@
 #define LED_PIN 48
 #define LUX_PIN 1
 #define FAN_PIN 6
+#define SOIL_MOISTURE_PIN 3
 
 #define NUM_PIXELS 1
 #define PIN_NEO_PIXEL 45

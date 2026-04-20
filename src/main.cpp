@@ -2,7 +2,7 @@
 
 // Task Fan - Done
 // Task Bom nuoc
-// Task Do am dat
+// Task Do am dat - Done
 
 void setup()
 {
@@ -25,6 +25,7 @@ void setup()
   xTaskCreatePinnedToCore(TaskLCD, "LCD Display", 4096, &app, 2, NULL, 1);
   xTaskCreatePinnedToCore(TaskNeoLED, "Neo LED Control", 2048, &app, 2, NULL, 1);
   //xTaskCreatePinnedToCore(TaskFanControl, "Fan Control", 2048, &app, 2, NULL, 1);
+  xTaskCreatePinnedToCore(TaskSoilMoisture, "Soil Moisture", 2048, &app, 2, NULL, 1);
 }
 
 void loop()

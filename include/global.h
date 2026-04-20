@@ -9,7 +9,8 @@
 typedef struct {
     float temperature;
     float humidity;
-    //float lux;
+    float soilMoisture;
+    float lux;
 } SensorData;
 extern SensorData sensorData;
 

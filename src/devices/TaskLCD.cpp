@@ -67,9 +67,16 @@ void TaskLCD(void *pvParameters){
             lcd.print("State: ");
             lcd.print(state);
 
-            lcd.setCursor(0,1);
+
+            vTaskDelay(2000);
+            lcd.clear();
+            lcd.setCursor(0, 0);
             char buffer[32];
             snprintf(buffer, sizeof(buffer), "T:%.1fC H:%.1f%%", temperature, humidity);
+            lcd.print(buffer);
+
+            lcd.setCursor(0, 1);
+            snprintf(buffer, sizeof(buffer), "SM:%.1f%% L:%.1f", rcvSensorData.soilMoisture, rcvSensorData.lux);
             lcd.print(buffer);
 
             //lcd.print("temp: "); lcd.print(temperature); lcd.print("C ");
