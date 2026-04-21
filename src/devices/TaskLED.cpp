@@ -36,11 +36,11 @@ void TaskLEDControl(void *pvParameters) {
         if (rcvSensorData.temperature > 20 && rcvSensorData.temperature < 30){
           delayTime = 1000;
         } // Warning
-        else if((rcvSensorData.temperature >= 15 || rcvSensorData.temperature <= 20) && 
-                (rcvSensorData.temperature >= 30 || rcvSensorData.temperature <= 35)){
+        else if((rcvSensorData.temperature >= 15 && rcvSensorData.temperature <= 20) || 
+                (rcvSensorData.temperature >= 30 && rcvSensorData.temperature <= 35)){
           delayTime = 500;
         } // Critical
-        else if (rcvSensorData.temperature < 15 || rcvSensorData.temperature > 35){
+        else if (rcvSensorData.temperature < 15 && rcvSensorData.temperature > 35){
           delayTime = 200;
         }
       }
