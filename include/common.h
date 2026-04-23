@@ -25,10 +25,12 @@
 #include <PubSubClient.h>
 #include <ThingsBoard.h>
 
-// #include <TensorFlowLite_ESP32.h>
-// #include "tensorflow/lite/micro/all_ops_resolver.h"
-// #include "tensorflow/lite/micro/micro_interpreter.h"
-// #include "tensorflow/lite/schema/schema_generated.h"
+#include <TensorFlowLite_ESP32.h>
+#include "tensorflow/lite/micro/all_ops_resolver.h"
+#include "tensorflow/lite/micro/micro_interpreter.h"
+#include "tensorflow/lite/schema/schema_generated.h"
+#include "tensorflow/lite/micro/micro_error_reporter.h"
+#include "tensorflow/lite/micro/system_setup.h"
 
 /* Includes Devices ----------------------------------------------------------*/
 #include "devices/TaskTempHumid.h"
@@ -39,6 +41,9 @@
 #include "devices/TaskFan.h"
 #include "devices/TaskSoilMoisture.h"
 #include "devices/TaskPump.h"
+
+/****************** TinyML Model ******************/
+#include "tinyml.h"
 
 /* Define --------------------------------------------------------------------*/
 

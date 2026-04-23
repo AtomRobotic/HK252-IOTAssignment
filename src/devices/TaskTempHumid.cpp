@@ -50,19 +50,16 @@ void SerialPrintTemperature(){
   float temperature = dht20.getTemperature();
   Serial.print("Temperature: "); Serial.print(temperature); Serial.println("°C");
 }
-
 void SerialPrintHumidity(){
   dht20.read();
   float humidity = dht20.getHumidity();
   Serial.print("Humidity: "); Serial.print(humidity); Serial.println("%");
 }
-
 float getTemperature(){
   dht20.read();
   float temperature = dht20.getTemperature();
   return temperature;
 }
-
 float getHumidity(){
   dht20.read();
   float humidity = dht20.getHumidity();

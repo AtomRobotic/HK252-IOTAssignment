@@ -1,10 +1,4 @@
 #include "common.h"
-
-// Task Fan - Done
-// Task Bom nuoc
-// Task Do am dat - Done
-
-
 void setup()
 {
   Serial.begin(115200);
@@ -21,7 +15,12 @@ void setup()
   app.xSemaphoreFan = xSemaphoreCreateBinary();
   app.xSemaphorePump = xSemaphoreCreateBinary();
 
-  
+  // if(xQueueSensor == NULL){
+  //   Serial.println("Failed to create sensor data queue!");
+  // }
+  // else{
+  //  Serial.println("Sensor data queue created successfully.");
+  // }
 
   xTaskCreatePinnedToCore(TaskLEDControl, "LED Control", 2048, &app, 2, NULL, 1);
   xTaskCreatePinnedToCore(TaskTemperature_Humidity, "Temp Humidity", 4096, &app, 2, NULL, 1);
@@ -31,10 +30,12 @@ void setup()
   //xTaskCreatePinnedToCore(TaskFanControl, "Fan Control", 2048, &app, 2, NULL, 1);
   xTaskCreatePinnedToCore(TaskSoilMoisture, "Soil Moisture", 2048, &app, 2, NULL, 1);
   xTaskCreatePinnedToCore(TaskPumpControl, "Pump Control", 2048, &app, 2, NULL, 1);
+  //xTaskCreatePinnedToCore(tiny_ml_task, "TinyML Task", 8192, &app, 2, NULL, 1);
+  
 
 }
 
 void loop()
 {
-  // put your main code here, to run repeatedly:
+  // Để trống vì FreeRTOS đã quản lý luồng chạy [cite: 6]
 }
