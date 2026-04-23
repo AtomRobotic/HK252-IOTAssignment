@@ -1,40 +1,51 @@
-#include <Arduino.h>
-#include "app_data_types.h"
-#include "freertos/FreeRTOS.h"
-#include "freertos/queue.h"
+#include "common.h"
 
-// Khai báo Queue Handle
-QueueHandle_t xSensorQueue;
 
-// Khai báo các Prototype Task
-void sensor_task(void *pvParameters);
-void tiny_ml_task(void *pvParameters); // Task bạn đã gửi trước đó
 
 void setup()
 {
   Serial.begin(115200);
   delay(1000);
-  Serial.println("--- Smart Home RTOS Initializing ---");
+  Serial.println("Hệ thống đang khởi động...");
 
-  // 1. Khởi tạo Queue (Sức chứa 5 gói tin, loại bỏ biến toàn cục)
-  xSensorQueue = xQueueCreate(5, sizeof(SensorData_t));
+  /* Khởi tạo Semaphores & Queues */
+  xBinarySemaphoreInternet = xSemaphoreCreateBinary();
+  xQueueSensor = xQueueCreate(1, sizeof(SensorData));
+  xSemaphoreLed = xSemaphoreCreateBinary();
+  xSemaphoreNeoLed = xSemaphoreCreateBinary();
+  xSemaphoreLCD = xSemaphoreCreateBinary();
+  xSemaphoreFan = xSemaphoreCreateBinary();
+  xSemaphorePump = xSemaphoreCreateBinary();
+  
+  // Giải phóng Semaphore ban đầu (nếu cần)
+  xSemaphoreGive(xSemaphoreFan);
+  xSemaphoreGive(xSemaphorePump);
 
-  if (xSensorQueue != NULL)
-  {
-    // 2. Tạo Task đọc/giả lập cảm biến (Độ ưu tiên 1)
-    xTaskCreate(sensor_task, "Sensor_Task", 3072, NULL, 1, NULL);
+  /* Gán vào AppContext cho các task */
+  static AppContext app;
+  app.xQueueSensor = xQueueSensor;
+  app.xSemaphoreLed = xSemaphoreLed;
+  app.xSemaphoreNeoLed = xSemaphoreNeoLed;
+  app.xSemaphoreLCD = xSemaphoreLCD;
+  app.xSemaphoreFan = xSemaphoreFan;
+  app.xSemaphorePump = xSemaphorePump;
+  app.xBinarySemaphoreInternet = xBinarySemaphoreInternet;
 
-    xTaskCreate(tiny_ml_task, "TinyML_Task", 8192, NULL, 2, NULL);
+  /* Tạo Task */
+  xTaskCreatePinnedToCore(TaskLEDControl, "LED Control", 2048, &app, 2, NULL, 1);
+  xTaskCreatePinnedToCore(TaskTemperature_Humidity, "Temp Humidity", 4096, &app, 2, NULL, 1);
+  // xTaskCreatePinnedToCore(TaskLuxSensor, "Lux Sensor", 2048, &app, 2, NULL, 1);
+  xTaskCreatePinnedToCore(TaskLCD, "LCD Display", 4096, &app, 2, NULL, 1);
+  xTaskCreatePinnedToCore(TaskNeoLED, "Neo LED Control", 2048, &app, 2, NULL, 1);
+  xTaskCreatePinnedToCore(TaskFanControl, "Fan Control", 2048, &app, 2, NULL, 1);
+  // xTaskCreatePinnedToCore(TaskSoilMoisture, "Soil Moisture", 2048, &app, 2, NULL, 1);
+  xTaskCreatePinnedToCore(TaskPumpControl, "Pump Control", 2048, &app, 2, NULL, 1);
+  xTaskCreatePinnedToCore(tiny_ml_task, "TinyML Task", 8192, &app, 2, NULL, 1);
 
-    Serial.println("FreeRTOS Tasks Started.");
-  }
-  else
-  {
-    Serial.println("Failed to create Queue!");
-  }
+  Serial.println("Khởi tạo hệ thống thành công!");
 }
 
 void loop()
 {
-  // Để trống vì FreeRTOS đã quản lý luồng chạy [cite: 6]
+  // FreeRTOS quản lý, loop để trống
 }
