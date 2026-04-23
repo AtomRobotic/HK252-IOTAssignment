@@ -21,6 +21,8 @@ void setup()
   app.xSemaphoreFan = xSemaphoreCreateBinary();
   app.xSemaphorePump = xSemaphoreCreateBinary();
 
+  
+
   xTaskCreatePinnedToCore(TaskLEDControl, "LED Control", 2048, &app, 2, NULL, 1);
   xTaskCreatePinnedToCore(TaskTemperature_Humidity, "Temp Humidity", 4096, &app, 2, NULL, 1);
   xTaskCreatePinnedToCore(TaskLuxSensor, "Lux Sensor", 2048, &app, 2, NULL, 1);
