@@ -21,6 +21,7 @@ extern SemaphoreHandle_t xSemaphoreLed;
 extern SemaphoreHandle_t xSemaphoreNeoLed;
 extern SemaphoreHandle_t xSemaphoreLCD;
 extern SemaphoreHandle_t xSemaphoreFan;
+extern SemaphoreHandle_t xSemaphorePump;
 extern SemaphoreHandle_t xSensorMutex;
 
 typedef enum {
@@ -36,6 +37,7 @@ typedef struct {
     SemaphoreHandle_t xSemaphoreNeoLed;
     SemaphoreHandle_t xSemaphoreLCD;
     SemaphoreHandle_t xSemaphoreFan;
+    SemaphoreHandle_t xSemaphorePump;
     SemaphoreHandle_t xBinarySemaphoreInternet;
 
     SensorData sensorData;

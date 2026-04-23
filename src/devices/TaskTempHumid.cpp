@@ -35,6 +35,7 @@ void TaskTemperature_Humidity(void *pvParameters){
       xSemaphoreGive(app->xSemaphoreLed);
       xSemaphoreGive(app->xSemaphoreNeoLed);
       xSemaphoreGive(app->xSemaphoreFan);
+      xSemaphoreGive(app->xSemaphorePump);
     }
 
     Serial.print("Temperature: "); Serial.print(temperature); Serial.print("°C ");
