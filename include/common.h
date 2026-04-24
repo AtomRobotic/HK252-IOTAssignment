@@ -3,9 +3,9 @@
 
 /* 1. Core definitions */
 #include <Arduino.h>
-#if !defined(Serial)
-  #include <HardwareSerial.h>
-#endif
+// #if !defined(Serial)
+//   #include <HardwareSerial.h>
+// #endif
 
 /* 2. Project Globals (Crucial for Task definitions) */
 #include "global.h"
