@@ -86,11 +86,9 @@ void tiny_ml_task(void *pvParameters)
             rcvSensorData.temperature, rcvSensorData.humidity,
             states[predicted_state], max_prob);
 
-        // Cập nhật trạng thái ML ra biến toàn cục để điều khiển Quạt/Bơm
         ml_predicted_state = predicted_state;
       }
     }
-    // Luôn delay để tránh lỗi Watchdog và nhường CPU cho task khác
     vTaskDelay(pdMS_TO_TICKS(2000));
   }
 }
