@@ -4,6 +4,6 @@
 #include "common.h"
 
 // Hàm dùng để khởi tạo Task đọc cảm biến (giả lập)
-void initMockSensorTask(SystemContext *ctx);
+void initMockSensorTask(void *pvParameters);
 
 #endif

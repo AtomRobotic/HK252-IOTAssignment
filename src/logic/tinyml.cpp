@@ -76,7 +76,7 @@ void tiny_ml_task(void *pvParameters) {
             rcvSensorData.temperature, rcvSensorData.humidity,
             states[predicted_state], max_prob);
 
-        ml_predicted_state = predicted_state;
+        app->ml_predicted_state = predicted_state;
       }
     }
     vTaskDelay(pdMS_TO_TICKS(2000));

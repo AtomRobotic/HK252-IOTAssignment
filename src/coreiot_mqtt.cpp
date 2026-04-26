@@ -1,8 +1,9 @@
 #include "coreiot_mqtt.h"
 #include <Preferences.h>
 
-void mqttTask(void *pvParameters) {
-    SystemContext *ctx = (SystemContext *)pvParameters;
+
+void initMQTTTask(void *pvParameters) {
+    AppContext *ctx = (AppContext *)pvParameters;
     
     Preferences prefs;
     prefs.begin("iot_config", false);
@@ -36,11 +37,10 @@ void mqttTask(void *pvParameters) {
             client.loop(); 
 
             if (xTaskGetTickCount() - lastPublishTime >= publishInterval) {
-                if (xQueuePeek(ctx->sensorQueue, &data, 0) == pdPASS) {
+                if (xQueuePeek(ctx->xQueueSensor, &data, 0) == pdPASS) {
                     StaticJsonDocument<200> doc;
                     doc["temperature"] = data.temperature;
                     doc["humidity"] = data.humidity;
-                    doc["soilMoisture"] = data.soilMoisture;
                     char jsonBuffer[256];
                     serializeJson(doc, jsonBuffer);
                     client.publish("v1/devices/me/telemetry", jsonBuffer);
@@ -50,8 +50,4 @@ void mqttTask(void *pvParameters) {
         }
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
-}
-
-void initMQTTTask(SystemContext *ctx) {
-    xTaskCreatePinnedToCore(mqttTask, "MQTTTask", 4096, (void*)ctx, 1, NULL, 0);
 }

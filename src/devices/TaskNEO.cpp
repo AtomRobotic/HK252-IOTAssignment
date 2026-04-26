@@ -1,4 +1,4 @@
-#include "common.h"
+#include "devices/TaskNeo.h"
 
 #define RED 0
 #define ORANGE 1
@@ -36,7 +36,7 @@ void TaskNeoLED(void *pvParameters) {
   SensorData rcvSensorData;
   while(1) {
     if(xSemaphoreTake(app->xSemaphoreNeoLed, portMAX_DELAY) == pdTRUE){
-      if(currentMode == MANUAL){
+      if(app->currentMode == MANUAL){
         Serial.println("Neo LED Control in MANUAL mode");
         xSemaphoreGive(app->xSemaphoreNeoLed); // Release the semaphore for other tasks
         continue; // Skip Neo LED control in MANUAL mode
@@ -56,6 +56,7 @@ void TaskNeoLED(void *pvParameters) {
         NeoPixel.setPixelColor(0, colorTable[colorIndex]);
         NeoPixel.show();
       }
+      xSemaphoreGive(app->xSemaphoreNeoLed); // Release the semaphore for other tasks
     }
     vTaskDelay(2000); // Update every second
   }

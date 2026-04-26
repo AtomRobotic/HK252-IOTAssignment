@@ -1,4 +1,4 @@
-#include "common.h"
+#include "devices/TaskSoilMoisture.h"
 
 void TaskSoilMoisture(void *pvParameters){
   while(1){
@@ -10,10 +10,10 @@ void TaskSoilMoisture(void *pvParameters){
     Serial.print("Soil Moisture Value: "); Serial.print(sensorValue); Serial.println("%");
 
     
-    app->sensorData.soilMoisture = sensorValue;
+    //app->sensorData.soilMoisture = sensorValue;
 
     SensorData packet;
-    packet.soilMoisture = sensorValue;
+    //packet.soilMoisture = sensorValue;
     packet.humidity = app->sensorData.humidity;
     packet.temperature = app->sensorData.temperature;
     xQueueOverwrite(app->xQueueSensor, &packet);

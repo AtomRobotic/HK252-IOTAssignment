@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-// Hàm khởi tạo Web Server, nhận vào 2 con trỏ Queue
-void initWebServer(SystemContext *ctx);
+// Hàm khởi tạo Web Server, nhận vào AppContext
+void initWebServer(void *pvParameters);
 
 #endif

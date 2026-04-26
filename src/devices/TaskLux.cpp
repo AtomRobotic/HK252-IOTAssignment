@@ -1,4 +1,4 @@
-#include "common.h"
+#include "devices/TaskLux.h"
 
 void TaskLuxSensor(void *pvParameters){
   while(1){
@@ -6,13 +6,15 @@ void TaskLuxSensor(void *pvParameters){
     Serial.print("LUX Value: "); Serial.println(luxValue);
 
     AppContext *app = (AppContext *)pvParameters;
-    app->sensorData.lux = luxValue;
+    //app->sensorData.lux = luxValue;
     SensorData packet;
-    packet.lux = luxValue;
+    //packet.lux = luxValue;
     packet.humidity = app->sensorData.humidity;
     packet.temperature = app->sensorData.temperature;
-    packet.soilMoisture = app->sensorData.soilMoisture;
+    //packet.soilMoisture = app->sensorData.soilMoisture;
     xQueueOverwrite(app->xQueueSensor, &packet);
+
+    xSemaphoreGive(app->xSemaphoreLCD); // Notify LCD task to update display
     
     vTaskDelay(5000);
   }

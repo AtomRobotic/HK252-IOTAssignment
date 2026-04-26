@@ -1,9 +1,8 @@
 #ifndef INCLUDE_TASKLUX_H_
 #define INCLUDE_TASKLUX_H_
+#include "../common.h"
 
-#include "global.h"
-
-extern void TaskLuxSensor(void *pvParameters);
-extern float getLuxValue();
+void TaskLuxSensor(void *pvParameters);
+float getLuxValue();
 
 #endif /* TASKLUX_H_ */

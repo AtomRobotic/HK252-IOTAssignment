@@ -3,13 +3,6 @@
 
 /* 1. Core definitions */
 #include <Arduino.h>
-// #if !defined(Serial)
-//   #include <HardwareSerial.h>
-// #endif
-
-/* 2. Project Globals (Crucial for Task definitions) */
-#include "global.h"
-
 /* 3. System Libraries */
 #include <Wire.h>
 #include <SPI.h>
@@ -18,6 +11,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <string.h>
 #include <Adafruit_NeoPixel.h>
+#include <nvs_flash.h>
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
@@ -50,6 +44,12 @@
 #include "devices/TaskSoilMoisture.h"
 #include "devices/TaskPump.h"
 
+/* Web server*/
+#include "sensor_mock.h"
+#include "web_server.h"
+#include "wifi_manager.h"
+#include "coreiot_mqtt.h"
+
 /* 6. Hardware Pins */
 #define SDA_PIN 11
 #define SCL_PIN 12
@@ -62,4 +62,36 @@
 #define NUM_PIXELS 1
 #define PIN_NEO_PIXEL 45
 
+/* 7. Struct  */
+typedef struct {
+    float temperature;
+    float humidity;
+    //float soilMoisture;
+    //float lux;
+} SensorData;
+
+
+typedef enum {
+    AUTO = 0,
+    MANUAL = 1
+} Mode;
+
+typedef struct {
+    QueueHandle_t xQueueSensor;
+    SemaphoreHandle_t xSemaphoreLed;
+    SemaphoreHandle_t xSemaphoreNeoLed;
+    SemaphoreHandle_t xSemaphoreLCD;
+    SemaphoreHandle_t xSemaphoreFan;
+    SemaphoreHandle_t xSemaphorePump;
+    SemaphoreHandle_t xBinarySemaphoreInternet;
+
+    SensorData sensorData;
+
+    Mode currentMode;
+
+    int ml_predicted_state;
+
+} AppContext;
+
+void initAppContext(AppContext *appContext);
 #endif /* __COMMON_H_ */

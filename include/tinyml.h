@@ -1,7 +1,6 @@
 #ifndef __TINY_ML__
 #define __TINY_ML__
-
-#include "global.h"
+#include "common.h"
 
 #include "dht_anomaly_model.h"
 // #include "app_data_types.h"

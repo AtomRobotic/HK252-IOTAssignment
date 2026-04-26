@@ -1,20 +1,4 @@
-#include "common.h"
-
-// void TaskLEDControl(void *pvParameters) {
-//   pinMode(LED_PIN, OUTPUT); // Initialize LED pin
-//   int ledState = 0;
-//   while(1) {
-    
-//     if (ledState == 0) {
-//       digitalWrite(LED_PIN, HIGH); // Turn ON LED
-//     } else {
-//       digitalWrite(LED_PIN, LOW); // Turn OFF LED
-//     }
-//     ledState = 1 - ledState;
-//     //Serial.println("LED State: " + String(ledState));
-//     vTaskDelay(2000);
-//   }
-// }
+#include "devices/TaskLED.h"
 
 void TaskLEDControl(void *pvParameters) {
   pinMode(LED_PIN, OUTPUT); // Initialize LED pin
@@ -26,7 +10,7 @@ void TaskLEDControl(void *pvParameters) {
 
   while(1){
     if(xSemaphoreTake(app->xSemaphoreLed, portMAX_DELAY) == pdTRUE){
-      if (currentMode == MANUAL) {
+      if (app->currentMode == MANUAL) {
         Serial.println("LED Control in MANUAL mode");
         xSemaphoreGive(app->xSemaphoreLed); // Release the semaphore for other tasks
         continue; // Skip LED control in MANUAL mode
@@ -44,6 +28,8 @@ void TaskLEDControl(void *pvParameters) {
           delayTime = 200;
         }
       }
+
+      xSemaphoreGive(app->xSemaphoreLed); // Release the semaphore for other tasks
 
       digitalWrite(LED_PIN, HIGH); // Turn ON LED
       vTaskDelay(delayTime); 

@@ -1,10 +1,8 @@
 #ifndef INCLUDE_TASKLED_H_
 #define INCLUDE_TASKLED_H_
-
-#include "global.h"
-
+#include "../common.h"
 // Task
-extern void TaskLEDControl(void *pvParameters);
+void TaskLEDControl(void *pvParameters);
 
 
 

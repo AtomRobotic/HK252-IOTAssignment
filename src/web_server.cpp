@@ -2,8 +2,9 @@
 #include <LittleFS.h>
 #include <Preferences.h>
 
-void initWebServer(SystemContext *ctx) {
-    
+void initWebServer(void *pvParameters) {
+    AppContext *ctx = (AppContext *)pvParameters;
+
     // Xóa biến Global AsyncWebServer, khởi tạo bằng con trỏ động
     AsyncWebServer *server = new AsyncWebServer(80);
 
@@ -12,16 +13,7 @@ void initWebServer(SystemContext *ctx) {
         return;
     }
 
-    // Đọc Rule Tự động từ Flash và Cập nhật Context (Có dùng Mutex)
-    Preferences pAuto;
-    pAuto.begin("iot_auto", true);
-    if (pAuto.getBytesLength("auto_cfg") == sizeof(AutoConfig)) {
-        if (xSemaphoreTake(ctx->autoMutex, portMAX_DELAY) == pdTRUE) {
-            pAuto.getBytes("auto_cfg", &ctx->autoCfg, sizeof(AutoConfig));
-            xSemaphoreGive(ctx->autoMutex);
-        }
-    }
-    pAuto.end();
+    // (No AutoConfig in AppContext) — keep web server simple and stateless here
 
     server->on("/", HTTP_GET, [](AsyncWebServerRequest *request){
         request->send(LittleFS, "/index.html", "text/html"); 
@@ -31,55 +23,36 @@ void initWebServer(SystemContext *ctx) {
         request->send(LittleFS, "/script.js", "text/javascript"); 
     });
 
-    // API NHẬN LUẬT TỪ GIAO DIỆN WEB GỬI XUỐNG
-    server->on("/save_auto", HTTP_GET, [ctx](AsyncWebServerRequest *request){
-        // Mở Mutex Khóa biến AutoConfig để ghi dữ liệu mới vào
-        if (xSemaphoreTake(ctx->autoMutex, portMAX_DELAY) == pdTRUE) {
-            if(request->hasParam("auto")) ctx->autoCfg.isAuto = request->getParam("auto")->value().toInt();
-            if(request->hasParam("r1")) ctx->autoCfg.r1_en = request->getParam("r1")->value().toInt();
-            if(request->hasParam("sL")) ctx->autoCfg.soil_low = request->getParam("sL")->value().toFloat();
-            if(request->hasParam("r2")) ctx->autoCfg.r2_en = request->getParam("r2")->value().toInt();
-            if(request->hasParam("sH")) ctx->autoCfg.soil_high = request->getParam("sH")->value().toFloat();
-            if(request->hasParam("r3")) ctx->autoCfg.r3_en = request->getParam("r3")->value().toInt();
-            if(request->hasParam("tH")) ctx->autoCfg.temp_high = request->getParam("tH")->value().toFloat();
-            if(request->hasParam("r4")) ctx->autoCfg.r4_en = request->getParam("r4")->value().toInt();
-            if(request->hasParam("tL")) ctx->autoCfg.temp_low = request->getParam("tL")->value().toFloat();
-
-            // Lưu Flash để mất điện không mất quy tắc
-            Preferences prefs;
-            prefs.begin("iot_auto", false);
-            prefs.putBytes("auto_cfg", &ctx->autoCfg, sizeof(AutoConfig));
-            prefs.end();
-
-            // Nhả Mutex
-            xSemaphoreGive(ctx->autoMutex);
-        }
+    // API NHẬN LUẬT TỰ ĐỘNG TỪ GIAO DIỆN WEB — lưu từng khóa vào Preferences (không dùng AutoConfig)
+    server->on("/save_auto", HTTP_GET, [](AsyncWebServerRequest *request){
+        Preferences prefs;
+        prefs.begin("iot_auto", false);
+        if(request->hasParam("auto")) prefs.putInt("isAuto", request->getParam("auto")->value().toInt());
+        if(request->hasParam("r1")) prefs.putInt("r1", request->getParam("r1")->value().toInt());
+        if(request->hasParam("sL")) prefs.putString("sL", request->getParam("sL")->value());
+        if(request->hasParam("r2")) prefs.putInt("r2", request->getParam("r2")->value().toInt());
+        if(request->hasParam("sH")) prefs.putString("sH", request->getParam("sH")->value());
+        if(request->hasParam("r3")) prefs.putInt("r3", request->getParam("r3")->value().toInt());
+        if(request->hasParam("tH")) prefs.putString("tH", request->getParam("tH")->value());
+        if(request->hasParam("r4")) prefs.putInt("r4", request->getParam("r4")->value().toInt());
+        if(request->hasParam("tL")) prefs.putString("tL", request->getParam("tL")->value());
+        prefs.end();
         request->send(200, "text/plain", "OK");
     });
 
     server->on("/data", HTTP_GET, [ctx](AsyncWebServerRequest *request){
         SensorData data;
-        if (xQueuePeek(ctx->sensorQueue, &data, 0) == pdPASS) {
+        if (xQueuePeek(ctx->xQueueSensor, &data, 0) == pdPASS) {
             char jsonBuffer[100];
-            snprintf(jsonBuffer, sizeof(jsonBuffer), "{\"t\":%.1f, \"h\":%.1f, \"s\":%.1f}", 
-                     data.temperature, data.humidity, data.soilMoisture);
+            snprintf(jsonBuffer, sizeof(jsonBuffer), "{\"t\":%.1f, \"h\":%.1f}", 
+                     data.temperature, data.humidity);
             request->send(200, "application/json", jsonBuffer);
         } else {
             request->send(503, "application/json", "{\"error\":\"No data\"}");
         }
     });
 
-    server->on("/relay", HTTP_GET, [ctx](AsyncWebServerRequest *request){
-        if (request->hasParam("id") && request->hasParam("state")) {
-            RelayCommand cmd;
-            cmd.deviceId = request->getParam("id")->value().toInt();
-            cmd.state = request->getParam("state")->value().toInt();
-            xQueueSend(ctx->relayQueue, &cmd, 0);
-            request->send(200, "text/plain", "OK");
-        } else {
-            request->send(400, "text/plain", "Bad Request");
-        }
-    });
+    // Relay control removed — device uses internal semaphores/flags for control
 
     // Cấu hình Wi-Fi
     server->on("/get_config", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -109,6 +82,7 @@ void initWebServer(SystemContext *ctx) {
         prefs.end();
         
         request->send(200, "text/plain", "OK");
+        // Restart device shortly after saving network config
         xTaskCreate([](void *param){
             vTaskDelay(1000 / portTICK_PERIOD_MS);
             ESP.restart();
@@ -116,4 +90,17 @@ void initWebServer(SystemContext *ctx) {
     });
 
     server->begin(); // Dùng biến con trỏ ->
+
+    // Tạo task để xuất dữ liệu hiện tại từ AppContext vào LittleFS để UI có thể đọc
+    xTaskCreatePinnedToCore([](void *pvParameters){
+        AppContext *ctx = (AppContext *)pvParameters;
+        while (1) {
+            char buf[128];
+            // Dùng trực tiếp dữ liệu trong AppContext (cập nhật bởi TaskTempHumid)
+            snprintf(buf, sizeof(buf), "{\"t\":%.1f,\"h\":%.1f}", ctx->sensorData.temperature, ctx->sensorData.humidity);
+            File f = LittleFS.open("/latest.json", "w");
+            if (f) { f.print(buf); f.close(); }
+            vTaskDelay(5000 / portTICK_PERIOD_MS);
+        }
+    }, "WebUITask", 4096, ctx, 1, NULL, 1);
 }
