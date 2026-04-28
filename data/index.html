@@ -8,7 +8,7 @@
     /* --- CSS CƠ BẢN --- */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; padding: 40px 20px; }
-    .container { width: 100%; max-width: 1200px; display: flex; flex-direction: column; gap: 20px; }
+    .container { width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 20px; }
 
     /* --- HEADER & NAV --- */
     .header-card { background-color: #ffffff; border-radius: 8px; border: 1px solid #e8e8e8; padding: 20px 24px; display: flex; align-items: center; }
@@ -23,27 +23,27 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
     /* --- TAB GIÁM SÁT --- */
-    .sensor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 10px; }
-    .sensor-card { background-color: #ffffff; border-radius: 8px; border: 1px solid #e8e8e8; padding: 24px; display: flex; flex-direction: column; position: relative; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-    .sensor-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
-    .temp-card::before { background-color: #ff4d4f; } .hum-card::before { background-color: #1890ff; } .soil-card::before { background-color: #52c41a; } 
-    .card-header { display: flex; justify-content: space-between; align-items: center; color: #595959; font-size: 18px; font-weight: 600; }
-    .card-header .icon { font-size: 24px; }
-    .card-body { margin-top: 16px; display: flex; align-items: baseline; }
-    .card-value { font-size: 48px; font-weight: bold; line-height: 1; }
-    .temp-card .card-value { color: #cf1322; } .hum-card .card-value { color: #096dd9; } .soil-card .card-value { color: #389e0d; }
-    .card-unit { font-size: 20px; color: #8c8c8c; margin-left: 8px; font-weight: 600; }
+    .sensor-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-top: 10px; }
+    .sensor-card { background-color: #ffffff; border-radius: 8px; border: 1px solid #e8e8e8; padding: 30px 24px; display: flex; flex-direction: column; position: relative; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .sensor-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; }
+    .temp-card::before { background-color: #ff4d4f; } 
+    .hum-card::before { background-color: #1890ff; } 
     
-    /* Progress Bar */
-    .progress-wrapper { margin-top: 20px; width: 100%; height: 6px; background-color: #f0f0f0; border-radius: 3px; position: relative; overflow: hidden; }
-    .progress-fill { height: 100%; border-radius: 3px; position: absolute; top: 0; left: 0; transition: width 0.5s ease-in-out; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; color: #595959; font-size: 20px; font-weight: 600; }
+    .card-header .icon { font-size: 28px; }
+    .card-body { margin-top: 20px; display: flex; align-items: baseline; }
+    .card-value { font-size: 56px; font-weight: bold; line-height: 1; }
+    .temp-card .card-value { color: #cf1322; } .hum-card .card-value { color: #096dd9; } 
+    .card-unit { font-size: 24px; color: #8c8c8c; margin-left: 10px; font-weight: 600; }
+    
+    .progress-wrapper { margin-top: 25px; width: 100%; height: 8px; background-color: #f0f0f0; border-radius: 4px; position: relative; overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 4px; position: absolute; top: 0; left: 0; transition: width 0.5s ease-in-out; }
     .temp-card .progress-fill { background-color: #ff4d4f; width: 0%; } 
     .hum-card .progress-fill { background-color: #1890ff; width: 0%; }
-    .soil-card .progress-fill { background-color: #52c41a; width: 0%; }
 
-    .card-footer { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+    .card-footer { margin-top: 20px; display: flex; justify-content: space-between; align-items: center; font-size: 15px; }
     .optimal-text { color: #8c8c8c; font-weight: 500; }
-    .status-badge { background-color: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; padding: 4px 10px; border-radius: 4px; font-weight: 600; }
+    .status-badge { background-color: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; padding: 4px 12px; border-radius: 4px; font-weight: 600; }
     .status-badge.warning { background-color: #fff2f0; color: #ff4d4f; border-color: #ffccc7; }
 
     /* Khối AI */
@@ -59,48 +59,52 @@
     .ai-status.warning { color: #fa8c16; } .ai-status.danger { color: #f5222d; }
     .ai-text { font-size: 16px; color: #595959; line-height: 1.6; font-weight: 500;}
 
-    /* --- TAB ĐIỀU KHIỂN & TỰ ĐỘNG --- */
+    /* --- FORM CONTROL (Cài đặt) --- */
     .panel-card { background: #fff; border-radius: 8px; border: 1px solid #e8e8e8; padding: 24px; margin-top: 10px; }
     .panel-title { font-size: 20px; font-weight: 700; color: #2c3e50; margin-bottom: 20px; }
     
-    .rule-card { background-color: #fafafa; border: 1px solid #e8e8e8; border-radius: 8px; padding: 20px; margin-bottom: 15px; transition: all 0.3s; }
-    .rule-card.active { background-color: #f6ffed; border-color: #b7eb8f; }
-    
-    .rule-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
-    .rule-title { font-size: 16px; font-weight: 600; color: #2c3e50; }
-
-    .rule-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 15px; }
-    .rule-grid label { display: block; font-size: 12px; font-weight: 600; color: #8c8c8c; margin-bottom: 5px; }
-    .rule-grid select, .rule-grid input { width: 100%; padding: 10px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 14px; background: #fff; }
-
-    .rule-summary { background: #fff; padding: 12px 16px; border-radius: 6px; font-size: 14px; color: #595959; border: 1px solid #e8e8e8; }
-    .rule-summary span { font-weight: 600; color: #2f54eb; }
-    .rule-card.active .rule-summary { border-color: #b7eb8f; }
-    .rule-card.active .rule-summary .action-text { color: #52c41a; }
-
-    /* Nút chọn chế độ */
+    /* Chế độ hoạt động */
     .mode-selector { display: flex; gap: 10px; background: #f0f2f5; padding: 6px; border-radius: 8px; margin-bottom: 20px; }
     .mode-btn { flex: 1; padding: 12px; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; color: #595959; cursor: pointer; transition: 0.3s; background: transparent; }
     .mode-btn.active { background: #ffffff; color: #2f54eb; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    
+    /* --- CSS NÂNG CẤP CHO ĐIỀU KHIỂN THỦ CÔNG --- */
+    .manual-list { display: flex; flex-direction: column; gap: 15px; }
+    .manual-item { 
+        display: flex; justify-content: space-between; align-items: center; 
+        padding: 20px; background-color: #fafafa; border: 1px solid #e8e8e8; 
+        border-radius: 8px; transition: all 0.3s;
+    }
+    .manual-item:hover { border-color: #d9d9d9; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    
+    .device-info { display: flex; align-items: center; gap: 15px; }
+    .device-icon { 
+        font-size: 24px; background: #fff; width: 48px; height: 48px; 
+        display: flex; justify-content: center; align-items: center; 
+        border-radius: 12px; border: 1px solid #f0f0f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); 
+    }
+    .device-name { font-size: 16px; font-weight: 600; color: #2c3e50; }
+    
+    .btn-group { display: flex; gap: 10px; }
+    .action-btn { 
+        padding: 10px 24px; border: none; border-radius: 6px; font-size: 14px; 
+        font-weight: bold; cursor: pointer; transition: 0.3s; 
+    }
+    .btn-on { background-color: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+    .btn-on:hover { background-color: #52c41a; color: white; }
+    .btn-off { background-color: #fff2f0; color: #ff4d4f; border: 1px solid #ffccc7; }
+    .btn-off:hover { background-color: #ff4d4f; color: white; }
+    
+    /* Class làm mờ khi ở chế độ AUTO */
+    .disabled { opacity: 0.4; pointer-events: none; filter: grayscale(100%); }
 
-    .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 24px; }
-    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-    input:checked + .slider { background-color: #52c41a; }
-    input:checked + .slider:before { transform: translateX(20px); }
-
-    .manual-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #f0f0f0; }
-    .btn-on { background-color: #52c41a; color: white; padding: 8px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;}
-    .btn-off { background-color: #ff4d4f; color: white; padding: 8px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;}
-
-    .disabled { opacity: 0.5; pointer-events: none; filter: grayscale(100%); }
-
-    /* CSS Cài đặt mạng */
+    /* --- Cài đặt mạng --- */
     .input-group { margin-bottom: 16px; }
     .input-group label { display: block; font-size: 14px; font-weight: 600; color: #595959; margin-bottom: 8px; }
-    .input-group input { width: 100%; padding: 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 15px;}
-    .save-btn { width: 100%; padding: 14px; background-color: #2f54eb; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+    .input-group input { width: 100%; padding: 12px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 15px; }
+    .input-group input:focus { border-color: #2f54eb; outline: none; box-shadow: 0 0 0 2px rgba(47,84,235,0.2); }
+    .save-btn { width: 100%; padding: 16px; background-color: #2f54eb; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+    .save-btn:hover { background-color: #1d39c4; }
   </style>
 </head>
 <body>
@@ -109,6 +113,7 @@
     <div class="header-card">
       <div class="title-section"><span class="main-title">Hệ thống Quản lý IoT</span><span class="sub-title">(Yolo)</span></div>
     </div>
+    
     <div class="nav-card">
       <button class="tab-btn active" onclick="openTab(event, 'tab-monitor')"><span>📊</span> Giám sát</button>
       <button class="tab-btn" onclick="openTab(event, 'tab-control')"><span>🎛️</span> Điều khiển</button>
@@ -121,26 +126,14 @@
           <div class="card-header"><span>Nhiệt độ</span><span class="icon">🌡️</span></div>
           <div class="card-body"><div class="card-value" id="temp">--</div><div class="card-unit">°C</div></div>
           <div class="progress-wrapper"><div class="progress-fill" id="temp-progress"></div></div>
-          <div class="card-footer"><span class="optimal-text">Tối ưu: 18-29°C</span><span class="status-badge" id="temp-status">Đang tải...</span></div>
+          <div class="card-footer"><span class="optimal-text">Tối ưu: 20-30°C</span><span class="status-badge" id="temp-status">Đang tải...</span></div>
         </div>
+        
         <div class="sensor-card hum-card">
-          <div class="card-header"><span>Độ ẩm không khí</span><span class="icon">💧</span></div>
+          <div class="card-header"><span>Độ ẩm</span><span class="icon">💧</span></div>
           <div class="card-body"><div class="card-value" id="hum">--</div><div class="card-unit">%</div></div>
           <div class="progress-wrapper"><div class="progress-fill" id="hum-progress"></div></div>
-          <div class="card-footer"><span class="optimal-text">Tối ưu: 60-80%</span><span class="status-badge" id="hum-status">Đang tải...</span></div>
-        </div>
-        <div class="sensor-card soil-card">
-          <div class="card-header"><span>Độ ẩm đất</span><span class="icon">🌱</span></div>
-          <div class="card-body"><div class="card-value" id="soil">--</div><div class="card-unit">%</div></div>
-          <div class="progress-wrapper"><div class="progress-fill" id="soil-progress"></div></div>
-          <div class="card-footer"><span class="optimal-text">Tối ưu: 40-60%</span><span class="status-badge" id="soil-status">Đang tải...</span></div>
-        </div>
-      </div>
-      <div class="ai-card">
-        <div class="ai-header"><span>Trí tuệ Nhân tạo (AI) - Phân tích Sức khỏe Cây trồng</span><span class="icon">🧠</span></div>
-        <div class="ai-body">
-          <div class="ai-score-box"><div class="ai-score" id="ai-score">--%</div><div class="ai-score-label">Sức khỏe tổng thể</div></div>
-          <div class="ai-recommendation"><div class="ai-status" id="ai-status">Đang phân tích...</div><div class="ai-text" id="ai-text">Hệ thống AI đang thu thập dữ liệu...</div></div>
+          <div class="card-footer"><span class="optimal-text">Tối ưu: 50-80%</span><span class="status-badge" id="hum-status">Đang tải...</span></div>
         </div>
       </div>
     </div>
@@ -150,127 +143,44 @@
       <div class="panel-card">
         <div class="panel-title">⚙️ Chế độ hoạt động</div>
         <div class="mode-selector">
-            <button class="mode-btn active" id="btn-manual" onclick="setMode('manual')">🖐️ Thủ công</button>
-            <button class="mode-btn" id="btn-auto" onclick="setMode('auto')">🤖 Tự động</button>
+            <button class="mode-btn" id="btn-manual" onclick="setMode('manual')">🖐️ Thủ công</button>
+            <button class="mode-btn active" id="btn-auto" onclick="setMode('auto')">🤖 Tự động (TinyML)</button>
+        </div>
+        <div style="background-color: #f6ffed; border: 1px solid #b7eb8f; padding: 15px; border-radius: 6px; margin-top: 15px;">
+            <p style="color: #389e0d; font-size: 14px; line-height: 1.6; margin: 0;">
+                <b>🤖 Ở chế độ Tự động:</b> Mô hình TinyML sẽ phân tích dữ liệu Nhiệt độ và Độ ẩm để tự ra quyết định bật/tắt thiết bị cho phù hợp nhất.<br>
+                <b>🖐️ Ở chế độ Thủ công:</b> Bạn có toàn quyền điều khiển thiết bị bằng các nút bấm bên dưới.
+            </p>
         </div>
       </div>
 
       <div class="panel-card">
-        <div class="panel-title">Quy tắc Tự động</div>
-
-        <div class="rule-card" id="card-rule1">
-          <div class="rule-header">
-            <label class="switch">
-              <input type="checkbox" id="toggle-rule1" onchange="toggleRule('rule1')">
-              <span class="slider"></span>
-            </label>
-            <span class="rule-title" id="title-rule1">Tự động bật máy bơm</span>
-          </div>
-          <div class="rule-grid">
-            <div>
-              <label>Cảm biến</label>
-              <select id="sensor-rule1" onchange="updateSummary('rule1')">
-                <option value="soil" selected>Độ ẩm đất</option>
-                <option value="temp">Nhiệt độ</option>
-                <option value="hum">Độ ẩm không khí</option>
-              </select>
+        <div class="panel-title">🎛️ Điều khiển Thủ công</div>
+        
+        <div id="manual-controls" class="manual-list disabled">
+          
+          <div class="manual-item">
+            <div class="device-info">
+                <div class="device-icon">💧</div>
+                <div class="device-name">Máy Bơm Nước</div>
             </div>
-            <div>
-              <label>Điều kiện</label>
-              <select id="cond-rule1" onchange="updateSummary('rule1')">
-                <option value="<" selected>Thấp hơn</option>
-                <option value=">">Cao hơn</option>
-              </select>
-            </div>
-            <div>
-              <label>Ngưỡng</label>
-              <input type="number" id="val-rule1" value="40" oninput="updateSummary('rule1')">
-            </div>
-            <div>
-              <label>Hành động</label>
-              <select id="action-rule1" onchange="updateSummary('rule1')">
-                <option value="Bật máy bơm" selected>Bật máy bơm</option>
-                <option value="Tắt máy bơm">Tắt máy bơm</option>
-                <option value="Bật quạt">Bật quạt</option>
-                <option value="Tắt quạt">Tắt quạt</option>
-              </select>
+            <div class="btn-group">
+              <button class="action-btn btn-on" onclick="sendCmd(1, 1)">BẬT</button>
+              <button class="action-btn btn-off" onclick="sendCmd(1, 0)">TẮT</button>
             </div>
           </div>
-          <div class="rule-summary">
-            <span id="icon-rule1">🌱</span> Khi <span id="s-rule1">Độ ẩm đất</span> <span id="c-rule1">< 40</span><span id="u-rule1">%</span> → <span id="a-rule1" class="action-text">Bật máy bơm</span>
-          </div>
-        </div>
-
-        <div class="rule-card active" id="card-rule2">
-          <div class="rule-header">
-            <label class="switch">
-              <input type="checkbox" id="toggle-rule2" onchange="toggleRule('rule2')" checked>
-              <span class="slider"></span>
-            </label>
-            <span class="rule-title" id="title-rule2">Tự động tắt máy bơm</span>
-          </div>
-          <div class="rule-grid">
-            <div><label>Cảm biến</label><select id="sensor-rule2" onchange="updateSummary('rule2')"><option value="soil" selected>Độ ẩm đất</option><option value="temp">Nhiệt độ</option></select></div>
-            <div><label>Điều kiện</label><select id="cond-rule2" onchange="updateSummary('rule2')"><option value="<">Thấp hơn</option><option value=">" selected>Cao hơn</option></select></div>
-            <div><label>Ngưỡng</label><input type="number" id="val-rule2" value="60" oninput="updateSummary('rule2')"></div>
-            <div><label>Hành động</label><select id="action-rule2" onchange="updateSummary('rule2')"><option value="Bật máy bơm">Bật máy bơm</option><option value="Tắt máy bơm" selected>Tắt máy bơm</option></select></div>
-          </div>
-          <div class="rule-summary"><span id="icon-rule2">🌱</span> Khi <span id="s-rule2">Độ ẩm đất</span> <span id="c-rule2">> 60</span><span id="u-rule2">%</span> → <span id="a-rule2" class="action-text">Tắt máy bơm</span></div>
-        </div>
-
-        <div class="rule-card active" id="card-rule3">
-          <div class="rule-header">
-            <label class="switch">
-              <input type="checkbox" id="toggle-rule3" onchange="toggleRule('rule3')" checked>
-              <span class="slider"></span>
-            </label>
-            <span class="rule-title" id="title-rule3">Tự đông bật quạt</span>
-          </div>
-          <div class="rule-grid">
-            <div><label>Cảm biến</label><select id="sensor-rule3" onchange="updateSummary('rule3')"><option value="soil">Độ ẩm đất</option><option value="temp" selected>Nhiệt độ</option></select></div>
-            <div><label>Điều kiện</label><select id="cond-rule3" onchange="updateSummary('rule3')"><option value="<">Thấp hơn</option><option value=">" selected>Cao hơn</option></select></div>
-            <div><label>Ngưỡng</label><input type="number" id="val-rule3" value="32" oninput="updateSummary('rule3')"></div>
-            <div><label>Hành động</label><select id="action-rule3" onchange="updateSummary('rule3')"><option value="Bật quạt" selected>Bật quạt</option><option value="Tắt quạt">Tắt quạt</option></select></div>
-          </div>
-          <div class="rule-summary"><span id="icon-rule3">🌡️</span> Khi <span id="s-rule3">Nhiệt độ</span> <span id="c-rule3">> 32</span><span id="u-rule3">°C</span> → <span id="a-rule3" class="action-text">Bật quạt</span></div>
-        </div>
-
-        <div class="rule-card active" id="card-rule4">
-          <div class="rule-header">
-            <label class="switch">
-              <input type="checkbox" id="toggle-rule4" onchange="toggleRule('rule4')" checked>
-              <span class="slider"></span>
-            </label>
-            <span class="rule-title" id="title-rule4">Tự động tắt quạt</span>
-          </div>
-          <div class="rule-grid">
-            <div><label>Cảm biến</label><select id="sensor-rule4" onchange="updateSummary('rule4')"><option value="soil">Độ ẩm đất</option><option value="temp" selected>Nhiệt độ</option><option value="hum">Độ ẩm không khí</option></select></div>
-            <div><label>Điều kiện</label><select id="cond-rule4" onchange="updateSummary('rule4')"><option value="<" selected>Thấp hơn</option><option value=">">Cao hơn</option></select></div>
-            <div><label>Ngưỡng</label><input type="number" id="val-rule4" value="28" oninput="updateSummary('rule4')"></div>
-            <div><label>Hành động</label><select id="action-rule4" onchange="updateSummary('rule4')"><option value="Bật quạt">Bật quạt</option><option value="Tắt quạt" selected>Tắt quạt</option></select></div>
-          </div>
-          <div class="rule-summary"><span id="icon-rule4">🌡️</span> Khi <span id="s-rule4">Nhiệt độ</span> <span id="c-rule4">< 28</span><span id="u-rule4">°C</span> → <span id="a-rule4" class="action-text">Tắt quạt</span></div>
-        </div>
-
-      </div>
-
-      <div class="panel-card">
-        <div class="panel-title">Điều khiển Thủ công</div>
-        <div id="manual-controls">
-          <div class="manual-row">
-            <span style="font-weight: 500; font-size: 16px;">💧 Máy Bơm Nước (Relay 1)</span>
-            <div style="display: flex; gap: 10px;">
-              <button class="btn-on" onclick="sendCmd(1, 1)">BẬT</button>
-              <button class="btn-off" onclick="sendCmd(1, 0)">TẮT</button>
+          
+          <div class="manual-item">
+            <div class="device-info">
+                <div class="device-icon">💨</div>
+                <div class="device-name">Quạt Thông Gió</div>
+            </div>
+            <div class="btn-group">
+              <button class="action-btn btn-on" onclick="sendCmd(2, 1)">BẬT</button>
+              <button class="action-btn btn-off" onclick="sendCmd(2, 0)">TẮT</button>
             </div>
           </div>
-          <div class="manual-row" style="border-bottom: none;">
-            <span style="font-weight: 500; font-size: 16px;">💨 Quạt Thông Gió (Relay 2)</span>
-            <div style="display: flex; gap: 10px;">
-              <button class="btn-on" onclick="sendCmd(2, 1)">BẬT</button>
-              <button class="btn-off" onclick="sendCmd(2, 0)">TẮT</button>
-            </div>
-          </div>
+          
         </div>
       </div>
 
@@ -278,28 +188,189 @@
 
     <div id="tab-settings" class="tab-content">
       <div style="max-width: 700px; margin: 0 auto;">
+        
         <div class="panel-card">
           <div class="panel-title">📶 Cấu hình Mạng Wi-Fi</div>
-          <div class="input-group"><label>Tên mạng Wi-Fi (SSID)</label><input type="text" id="ssid" placeholder="Nhập tên Wi-Fi (Ví dụ: Home_Network)"></div>
-          <div class="input-group"><label>Mật khẩu (Password)</label><input type="password" id="pass" placeholder="Bỏ trống nếu Wi-Fi không có mật khẩu"></div>
+          <div class="input-group">
+            <label>Tên mạng Wi-Fi (SSID)</label>
+            <input type="text" id="ssid" placeholder="Nhập tên Wi-Fi (Ví dụ: Home_Network)">
+          </div>
+          <div class="input-group">
+            <label>Mật khẩu (Password)</label>
+            <input type="password" id="pass" placeholder="Bỏ trống nếu Wi-Fi không có mật khẩu">
+          </div>
         </div>
 
         <div class="panel-card">
           <div class="panel-title">☁️ Cấu hình Máy chủ (MQTT Broker)</div>
-          <div class="input-group"><label>Địa chỉ Máy chủ</label><input type="text" id="mqtt_server" placeholder="Ví dụ: app.coreiot.io"></div>
+          <div class="input-group">
+            <label>Địa chỉ Máy chủ</label>
+            <input type="text" id="mqtt_server" placeholder="Ví dụ: app.coreiot.io">
+          </div>
           <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px;">
-            <div class="input-group"><label>Cổng kết nối (Port)</label><input type="number" id="mqtt_port" value="1883"></div>
-            <div class="input-group"><label>Mã xác thực (Access Token)</label><input type="text" id="mqtt_token" placeholder="Chuỗi Token cấp bởi Server"></div>
+            <div class="input-group">
+              <label>Cổng kết nối (Port)</label>
+              <input type="number" id="mqtt_port" value="1883">
+            </div>
+            <div class="input-group">
+              <label>Mã xác thực (Access Token)</label>
+              <input type="text" id="mqtt_token" placeholder="Chuỗi Token cấp bởi Server">
+            </div>
           </div>
         </div>
 
-        <button class="save-btn" style="padding: 16px; font-size: 18px; box-shadow: 0 4px 6px rgba(47,84,235,0.2);" onclick="saveNetworkConfig()">
-          💾 LƯU CẤU HÌNH VÀ KHỞI ĐỘNG LẠI
+        <button class="save-btn" style="box-shadow: 0 4px 6px rgba(47,84,235,0.2);" onclick="saveNetworkConfig()">
+          💾 LƯU CẤU HÌNH VÀ KHỞI ĐỘNG LẠI MẠCH
         </button>
       </div>
     </div>
+
   </div>
 
-  <script src="/script.js"></script>
+  <!-- <script src="/script.js"></script> -->
+  <script>function openTab(evt, tabId) {
+    let tabContents = document.getElementsByClassName("tab-content");
+    for (let i = 0; i < tabContents.length; i++) { tabContents[i].classList.remove("active"); }
+    let tabBtns = document.getElementsByClassName("tab-btn");
+    for (let i = 0; i < tabBtns.length; i++) { tabBtns[i].classList.remove("active"); }
+    document.getElementById(tabId).classList.add("active");
+    evt.currentTarget.classList.add("active");
+}
+
+// Logic lấy dữ liệu từ ESP32 mỗi 5 giây
+setInterval(function() {
+    fetch('/data')
+        .then(res => res.json())
+        .then(data => {
+            let t = parseFloat(data.t); 
+            let h = parseFloat(data.h); 
+            
+            // Cập nhật số liệu hiển thị
+            document.getElementById('temp').innerHTML = t.toFixed(1); 
+            document.getElementById('hum').innerHTML = h.toFixed(1); 
+
+            // Cập nhật thanh Progress
+            document.getElementById('temp-progress').style.width = Math.min((t / 50 * 100), 100) + "%";
+            document.getElementById('hum-progress').style.width = Math.min(h, 100) + "%";
+
+            // Logic cảnh báo nhiệt độ
+            let tempBadge = document.getElementById('temp-status');
+            if (t >= 20 && t <= 30) {
+                tempBadge.innerHTML = '✓ Normal'; 
+                tempBadge.className = 'status-badge';
+            } else if ((t >= 15 && t < 20) || (t > 30 && t <= 35)) {
+                tempBadge.innerHTML = '⚠️ Warning'; 
+                tempBadge.className = 'status-badge warning';
+            } else {
+                tempBadge.innerHTML = '🚨 Critical'; 
+                tempBadge.className = 'status-badge warning'; 
+                tempBadge.style.color = '#f5222d'; 
+                tempBadge.style.borderColor = '#ffa39e';
+                tempBadge.style.backgroundColor = '#fff1f0';
+            }
+
+            // Logic cảnh báo độ ẩm
+            let humBadge = document.getElementById('hum-status');
+            if (h >= 50 && h <= 80) {
+                humBadge.innerHTML = '✓ Normal'; 
+                humBadge.className = 'status-badge';
+            } else if ((h >= 40 && h < 50) || (h > 80 && h <= 90)) {
+                humBadge.innerHTML = '⚠️ Warning'; 
+                humBadge.className = 'status-badge warning';
+            } else {
+                humBadge.innerHTML = '🚨 Critical'; 
+                humBadge.className = 'status-badge warning';
+                humBadge.style.color = '#f5222d'; 
+                humBadge.style.borderColor = '#ffa39e';
+                humBadge.style.backgroundColor = '#fff1f0';
+            }
+
+        })
+        .catch(e => console.log("Lỗi lấy dữ liệu:", e));
+}, 5000);
+
+// Nút gạt chế độ (UI tạm)
+function setMode(mode) {
+    document.getElementById('btn-manual').classList.toggle('active', mode === 'manual');
+    document.getElementById('btn-auto').classList.toggle('active', mode === 'auto');
+    console.log("Đã chuyển chế độ:", mode);
+}
+
+function sendCmd(deviceId, state) {
+    fetch(`/relay?id=${deviceId}&state=${state}`).then(response => { if(response.ok) console.log(`Gửi lệnh OK`); });
+}
+
+// --- HÀM LƯU CẤU HÌNH XUỐNG ESP32 ---
+function saveNetworkConfig() {
+    const ssid = document.getElementById('ssid').value;
+    const pass = document.getElementById('pass').value;
+    const server = document.getElementById('mqtt_server').value;
+    const port = document.getElementById('mqtt_port').value;
+    const token = document.getElementById('mqtt_token').value;
+
+    if(!ssid && !pass && !server && !token) {
+        if(!confirm("Bạn đang để trống thông tin. Mạch sẽ khởi động lại với cấu hình cũ. Tiếp tục?")) return;
+    }
+    
+    // Gửi URL chứa Query Params xuống ESP32
+    const url = `/config?ssid=${encodeURIComponent(ssid)}&pass=${encodeURIComponent(pass)}&server=${encodeURIComponent(server)}&port=${port}&token=${encodeURIComponent(token)}`;
+    fetch(url).then(response => {
+        if(response.ok) {
+            alert("Đã lưu thành công! ESP32 đang khởi động lại...");
+            setTimeout(() => { window.location.reload(); }, 5000);
+        } else {
+            alert("Lỗi khi lưu cấu hình!");
+        }
+    }).catch(error => alert("Lỗi kết nối tới mạch ESP32!"));
+}
+
+// Hàm chuyển đổi chế độ Auto / Manual
+function setMode(mode) {
+    // 1. Đổi màu nút bấm UI
+    document.getElementById('btn-manual').classList.toggle('active', mode === 'manual');
+    document.getElementById('btn-auto').classList.toggle('active', mode === 'auto');
+    
+    // 2. Làm mờ hoặc Mở khóa khu vực nút bấm thủ công
+    let manualControls = document.getElementById('manual-controls');
+    if (mode === 'manual') {
+        manualControls.classList.remove('disabled');
+    } else {
+        manualControls.classList.add('disabled');
+    }
+    
+    // 3. Gửi tín hiệu xuống ESP32 (0 = AUTO, 1 = MANUAL theo enum Mode trong C++)
+    let modeValue = (mode === 'auto') ? 0 : 1;
+    fetch(`/set_mode?mode=${modeValue}`)
+        .then(response => {
+            if(response.ok) console.log("Đã chuyển sang chế độ:", mode.toUpperCase());
+        })
+        .catch(e => console.error("Lỗi chuyển chế độ", e));
+}
+
+// Hàm gửi lệnh Bật/Tắt thiết bị
+function sendCmd(deviceId, state) {
+    fetch(`/relay?id=${deviceId}&state=${state}`)
+        .then(response => { 
+            if(response.ok) {
+                console.log(`Đã gửi lệnh điều khiển: Thiết bị ${deviceId} -> ${state ? 'BẬT' : 'TẮT'}`); 
+            }
+        })
+        .catch(e => console.error("Lỗi điều khiển", e));
+}
+
+// --- TỰ ĐỘNG TẢI CẤU HÌNH HIỆN TẠI KHI MỞ TRANG ---
+window.onload = function() {
+    fetch('/get_config')
+        .then(response => response.json())
+        .then(data => {
+            if(data.ssid) {
+                document.getElementById('ssid').placeholder = "Đang dùng: " + data.ssid;
+            }
+            if(data.server) document.getElementById('mqtt_server').value = data.server;
+            if(data.port) document.getElementById('mqtt_port').value = data.port;
+            if(data.token) document.getElementById('mqtt_token').value = data.token;
+        })
+        .catch(e => console.log("Chưa tải được cấu hình mạng"));
+};</script>
 </body>
 </html>

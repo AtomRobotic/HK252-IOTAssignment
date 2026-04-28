@@ -5,15 +5,12 @@
 void initWebServer(void *pvParameters) {
     AppContext *ctx = (AppContext *)pvParameters;
 
-    // Xóa biến Global AsyncWebServer, khởi tạo bằng con trỏ động
     AsyncWebServer *server = new AsyncWebServer(80);
 
     if(!LittleFS.begin(true)){
         Serial.println("[Web Server] Lỗi: Không thể mount LittleFS");
         return;
     }
-
-    // (No AutoConfig in AppContext) — keep web server simple and stateless here
 
     server->on("/", HTTP_GET, [](AsyncWebServerRequest *request){
         request->send(LittleFS, "/index.html", "text/html"); 
@@ -23,23 +20,7 @@ void initWebServer(void *pvParameters) {
         request->send(LittleFS, "/script.js", "text/javascript"); 
     });
 
-    // API NHẬN LUẬT TỰ ĐỘNG TỪ GIAO DIỆN WEB — lưu từng khóa vào Preferences (không dùng AutoConfig)
-    server->on("/save_auto", HTTP_GET, [](AsyncWebServerRequest *request){
-        Preferences prefs;
-        prefs.begin("iot_auto", false);
-        if(request->hasParam("auto")) prefs.putInt("isAuto", request->getParam("auto")->value().toInt());
-        if(request->hasParam("r1")) prefs.putInt("r1", request->getParam("r1")->value().toInt());
-        if(request->hasParam("sL")) prefs.putString("sL", request->getParam("sL")->value());
-        if(request->hasParam("r2")) prefs.putInt("r2", request->getParam("r2")->value().toInt());
-        if(request->hasParam("sH")) prefs.putString("sH", request->getParam("sH")->value());
-        if(request->hasParam("r3")) prefs.putInt("r3", request->getParam("r3")->value().toInt());
-        if(request->hasParam("tH")) prefs.putString("tH", request->getParam("tH")->value());
-        if(request->hasParam("r4")) prefs.putInt("r4", request->getParam("r4")->value().toInt());
-        if(request->hasParam("tL")) prefs.putString("tL", request->getParam("tL")->value());
-        prefs.end();
-        request->send(200, "text/plain", "OK");
-    });
-
+    // API LẤY DỮ LIỆU CẢM BIẾN
     server->on("/data", HTTP_GET, [ctx](AsyncWebServerRequest *request){
         SensorData data;
         if (xQueuePeek(ctx->xQueueSensor, &data, 0) == pdPASS) {
@@ -52,9 +33,54 @@ void initWebServer(void *pvParameters) {
         }
     });
 
-    // Relay control removed — device uses internal semaphores/flags for control
+    // =========================================================
+    // API CHUYỂN CHẾ ĐỘ HOẠT ĐỘNG (AUTO / MANUAL)
+    // =========================================================
+    server->on("/set_mode", HTTP_GET, [ctx](AsyncWebServerRequest *request){
+        if (request->hasParam("mode")) {
+            int modeVal = request->getParam("mode")->value().toInt();
+            
+            // 0 = AUTO, 1 = MANUAL
+            ctx->currentMode = (modeVal == 0) ? AUTO : MANUAL;
+            
+            // Tính năng an toàn: Khi chuyển chế độ, tạm TẮT mọi thiết bị
+            digitalWrite(PUMP_PIN, LOW);
+            ledcWrite(0, 0); // Kênh 0 là Quạt
+            
+            Serial.printf("[Web] Chuyển chế độ: %s\n", (ctx->currentMode == AUTO) ? "AUTO (TinyML)" : "MANUAL");
+            request->send(200, "text/plain", "OK");
+        } else {
+            request->send(400, "text/plain", "Bad Request");
+        }
+    });
 
-    // Cấu hình Wi-Fi
+    // =========================================================
+    // API ĐIỀU KHIỂN THỦ CÔNG TỪ WEB (CHỈ CHẠY KHI Ở MANUAL)
+    // =========================================================
+    server->on("/relay", HTTP_GET, [ctx](AsyncWebServerRequest *request){
+        if (request->hasParam("id") && request->hasParam("state")) {
+            int deviceId = request->getParam("id")->value().toInt();
+            int state = request->getParam("state")->value().toInt();
+            
+            if (ctx->currentMode == MANUAL) {
+                if (deviceId == 1) { // 1 = Máy bơm
+                    digitalWrite(PUMP_PIN, state ? HIGH : LOW);
+                    Serial.printf("[Web MANUAL] Máy Bơm -> %s\n", state ? "BẬT" : "TẮT");
+                } 
+                else if (deviceId == 2) { // 2 = Quạt
+                    ledcWrite(0, state ? 255 : 0); // Quạt dùng PWM
+                    Serial.printf("[Web MANUAL] Quạt -> %s\n", state ? "BẬT" : "TẮT");
+                }
+                request->send(200, "text/plain", "OK");
+            } else {
+                request->send(403, "text/plain", "Loi: He thong dang o che do AUTO");
+            }
+        } else {
+            request->send(400, "text/plain", "Bad Request");
+        }
+    });
+
+    // CẤU HÌNH WI-FI & MQTT
     server->on("/get_config", HTTP_GET, [](AsyncWebServerRequest *request){
         Preferences prefs;
         prefs.begin("iot_config", true); 
@@ -82,25 +108,11 @@ void initWebServer(void *pvParameters) {
         prefs.end();
         
         request->send(200, "text/plain", "OK");
-        // Restart device shortly after saving network config
         xTaskCreate([](void *param){
             vTaskDelay(1000 / portTICK_PERIOD_MS);
             ESP.restart();
         }, "RebootTask", 2048, NULL, 1, NULL);
     });
 
-    server->begin(); // Dùng biến con trỏ ->
-
-    // Tạo task để xuất dữ liệu hiện tại từ AppContext vào LittleFS để UI có thể đọc
-    xTaskCreatePinnedToCore([](void *pvParameters){
-        AppContext *ctx = (AppContext *)pvParameters;
-        while (1) {
-            char buf[128];
-            // Dùng trực tiếp dữ liệu trong AppContext (cập nhật bởi TaskTempHumid)
-            snprintf(buf, sizeof(buf), "{\"t\":%.1f,\"h\":%.1f}", ctx->sensorData.temperature, ctx->sensorData.humidity);
-            File f = LittleFS.open("/latest.json", "w");
-            if (f) { f.print(buf); f.close(); }
-            vTaskDelay(5000 / portTICK_PERIOD_MS);
-        }
-    }, "WebUITask", 4096, ctx, 1, NULL, 1);
+    server->begin();
 }

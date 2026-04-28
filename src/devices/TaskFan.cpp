@@ -5,7 +5,6 @@
 #define FAN_RESOLUTION 8
 
 #define FAN_OFF 0
-#define FAN_LOW 128
 #define FAN_HIGH 255
 
 void TaskFanControl(void *pvParameters){
@@ -14,24 +13,24 @@ void TaskFanControl(void *pvParameters){
   AppContext *app = (AppContext *)pvParameters;
 
   while(1){
-    // Code to control the fan based on sensor data
-
+    // Chờ tín hiệu (Semaphore) kích hoạt từ cảm biến
     if(xSemaphoreTake(app->xSemaphoreFan, portMAX_DELAY) == pdTRUE){
+      
+      // Tính năng an toàn dự phòng: Nếu đang ở MANUAL thì Task này không làm gì cả
       if (app->currentMode == MANUAL) {
-        Serial.println("Fan Control in MANUAL mode");
-        xSemaphoreGive(app->xSemaphoreFan); // Release the semaphore for other tasks
-        continue; // Skip fan control in MANUAL mode
+        // Nhường quyền cho Web Server điều khiển
+      } 
+      else {
+        // CHẾ ĐỘ AUTO: Dùng kết quả phân tích từ TinyML
+        // 1: Bật quạt, 3: Bật cả 2
+        if (app->ml_predicted_state == 1 || app->ml_predicted_state == 3) {
+          ledcWrite(FAN_CHANNEL, FAN_HIGH); 
+          Serial.println("[TinyML Auto] Quạt: BẬT");
+        } else {
+          ledcWrite(FAN_CHANNEL, FAN_OFF); 
+          Serial.println("[TinyML Auto] Quạt: TẮT");
+        }
       }
-      // Use TinyML prediction for Fan Control
-      if (app->ml_predicted_state == 1 || app->ml_predicted_state == 3) {
-        ledcWrite(FAN_CHANNEL, FAN_HIGH); // Turn ON fan
-        Serial.println("Fan ON (TinyML)");
-      } else {
-        ledcWrite(FAN_CHANNEL, FAN_OFF); // Turn OFF fan
-        Serial.println("Fan OFF (TinyML)");
-      }
-      xSemaphoreGive(app->xSemaphoreFan); // Release the semaphore for other tasks
     }
-    vTaskDelay(2000 / portTICK_PERIOD_MS);
   }
 }
