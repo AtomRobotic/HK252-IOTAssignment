@@ -25,18 +25,19 @@ void setup()
   initWebServer(appContext);
 
   /* Tạo Task */
-  // xTaskCreatePinnedToCore(TaskLEDControl, "LED Control", 2048, appContext, 2, NULL, 1);
-  // xTaskCreatePinnedToCore(TaskTemperature_Humidity, "Temp Humidity", 4096, appContext, 2, NULL, 1);
-  // xTaskCreatePinnedToCore(TaskLCD, "LCD Display", 4096, appContext, 2, NULL, 1);
-  // xTaskCreatePinnedToCore(TaskNeoLED, "Neo LED Control", 2048, appContext, 2, NULL, 1);
-  // xTaskCreatePinnedToCore(TaskFanControl, "Fan Control", 2048, appContext, 2, NULL, 1);
-  // xTaskCreatePinnedToCore(TaskPumpControl, "Pump Control", 2048, appContext, 2, NULL, 1);
-  // xTaskCreatePinnedToCore(tiny_ml_task, "TinyML Task", 8192, appContext, 2, NULL, 1);
+  xTaskCreatePinnedToCore(TaskLEDControl, "LED Control", 2048, appContext, 2, NULL, 1);
+  xTaskCreatePinnedToCore(TaskTemperature_Humidity, "Temp Humidity", 4096, appContext, 2, NULL, 1);
+  xTaskCreatePinnedToCore(TaskLCD, "LCD Display", 4096, appContext, 2, NULL, 1);
+  xTaskCreatePinnedToCore(TaskNeoLED, "Neo LED Control", 2048, appContext, 2, NULL, 1);
+  xTaskCreatePinnedToCore(TaskFanControl, "Fan Control", 2048, appContext, 2, NULL, 1);
+  xTaskCreatePinnedToCore(TaskPumpControl, "Pump Control", 2048, appContext, 2, NULL, 1);
+  xTaskCreatePinnedToCore(tiny_ml_task, "TinyML Task", 8192, appContext, 2, NULL, 1);
+
   // xTaskCreatePinnedToCore(TaskLuxSensor, "Lux Sensor", 2048, appContext, 2, NULL, 1);
   // xTaskCreatePinnedToCore(TaskSoilMoisture, "Soil Moisture", 2048, appContext, 2, NULL, 1);
 
   /* Khởi tạo MQTT Task */
-  // xTaskCreatePinnedToCore(initMQTTTask, "MQTT Task", 4096, appContext, 1, NULL, 0);
+  xTaskCreatePinnedToCore(initMQTTTask, "MQTT Task", 4096, appContext, 1, NULL, 0);
 
   Serial.println("Khởi tạo hệ thống thành công!");
 }

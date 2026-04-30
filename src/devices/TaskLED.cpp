@@ -10,11 +10,11 @@ void TaskLEDControl(void *pvParameters) {
 
   while(1){
     if(xSemaphoreTake(app->xSemaphoreLed, portMAX_DELAY) == pdTRUE){
-      if (app->currentMode == MANUAL) {
-        Serial.println("LED Control in MANUAL mode");
-        xSemaphoreGive(app->xSemaphoreLed); // Release the semaphore for other tasks
-        continue; // Skip LED control in MANUAL mode
-      }
+      // if (app->currentMode == MANUAL) {
+      //   Serial.println("LED Control in MANUAL mode");
+      //   xSemaphoreGive(app->xSemaphoreLed); // Release the semaphore for other tasks
+      //   continue; // Skip LED control in MANUAL mode
+      // }
       if(xQueuePeek(app->xQueueSensor, &rcvSensorData, 0) == pdTRUE){
         // Normal
         if (rcvSensorData.temperature > 20 && rcvSensorData.temperature < 30){
