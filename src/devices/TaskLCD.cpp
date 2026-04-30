@@ -10,6 +10,8 @@ void TaskLCD(void *pvParameters){
     lcd.setCursor(0,0);
     lcd.print("Initializing...");
 
+    vTaskDelay(2000 / portTICK_PERIOD_MS);
+
     SensorData rcvSensorData;
     AppContext *app = (AppContext *)pvParameters;
 
