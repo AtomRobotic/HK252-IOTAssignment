@@ -17,7 +17,29 @@ void TaskLCD(void *pvParameters){
 
     while(1){
         if(xSemaphoreTake(app->xSemaphoreLCD, portMAX_DELAY) == pdTRUE){
-          if(xQueuePeek(app->xQueueSensor, &rcvSensorData, 0) == pdTRUE){
+          if(app->currentMode == MANUAL){
+            lcd.clear();
+            lcd.setCursor(0,0);
+            lcd.print("MANUAL MODE");
+
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("");
+
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+            lcd.clear();
+            lcd.setCursor(0, 0);
+            lcd.print("MANUAL MODE");
+
+
+            xSemaphoreGive(app->xSemaphoreLCD); // Release the semaphore for other tasks
+            vTaskDelay(2000 / portTICK_PERIOD_MS);
+            continue; // Skip LCD update in MANUAL mode
+          }
+          else if(xQueuePeek(app->xQueueSensor, &rcvSensorData, 0) == pdTRUE){
             rcvSensorData = app->sensorData;
             float temperature = rcvSensorData.temperature;
             float humidity = rcvSensorData.humidity;
